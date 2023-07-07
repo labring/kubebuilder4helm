@@ -17,9 +17,9 @@ limitations under the License.
 package v1
 
 import (
+	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v2/scaffolds"
 )
 
 var _ plugin.CreateWebhookSubcommand = &createWebhookSubcommand{}

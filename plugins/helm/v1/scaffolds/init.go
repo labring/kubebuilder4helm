@@ -19,13 +19,13 @@ package scaffolds
 import (
 	"fmt"
 
+	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/kdefault"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/manager"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/prometheus"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/rbac"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugins"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v2/scaffolds/internal/templates/config/kdefault"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v2/scaffolds/internal/templates/config/manager"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v2/scaffolds/internal/templates/config/prometheus"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v2/scaffolds/internal/templates/config/rbac"
 )
 
 const (

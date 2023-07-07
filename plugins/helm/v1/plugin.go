@@ -27,7 +27,7 @@ import (
 // KustomizeVersion is the kubernetes-sigs/kustomize version to be used in the project
 const KustomizeVersion = "v5.0.1"
 
-const pluginName = "kustomize.common." + plugins.DefaultNameQualifier
+const pluginName = "helm.common." + plugins.DefaultNameQualifier
 
 var (
 	pluginVersion            = plugin.Version{Number: 2, Stage: stage.Stable}

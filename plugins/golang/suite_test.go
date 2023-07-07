@@ -14,25 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package golang
 
 import (
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds"
-	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-var _ plugin.CreateAPISubcommand = &createAPISubcommand{}
-
-type createAPISubcommand struct {
-	createSubcommand
-}
-
-func (p *createAPISubcommand) Scaffold(fs machinery.Filesystem) error {
-	if err := p.configure(); err != nil {
-		return err
-	}
-	scaffolder := scaffolds.NewAPIScaffolder(p.config, *p.resource, p.force)
-	scaffolder.InjectFS(fs)
-	return scaffolder.Scaffold()
+func TestGoPlugin(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Go Plugin Suite")
 }
