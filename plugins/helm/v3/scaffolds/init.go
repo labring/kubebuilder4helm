@@ -19,10 +19,10 @@ package scaffolds
 import (
 	"fmt"
 
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/kdefault"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/manager"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/prometheus"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/rbac"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/kdefault"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/manager"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/prometheus"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/rbac"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugins"
@@ -79,10 +79,6 @@ func (s *initScaffolder) Scaffold() error {
 		&kdefault.ManagerConfigPatch{},
 		&prometheus.Kustomization{},
 		&prometheus.Monitor{},
-	}
-
-	if s.config.IsComponentConfig() {
-		templates = append(templates, &manager.ControllerManagerConfig{})
 	}
 
 	return scaffold.Execute(templates...)

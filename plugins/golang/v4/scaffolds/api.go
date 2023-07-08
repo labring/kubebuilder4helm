@@ -102,7 +102,7 @@ func (s *apiScaffolder) Scaffold() error {
 	if doController {
 		if err := scaffold.Execute(
 			&controllers.SuiteTest{Force: s.force},
-			&controllers.Controller{ControllerRuntimeVersion: ControllerRuntimeVersion, Force: s.force},
+			&controllers.Controller{ControllerRuntimeVersion: ControllerRuntimeVersion, EndpointOperatorLibVersion: EndpointOperatorLibVersion, Force: s.force},
 		); err != nil {
 			return fmt.Errorf("error scaffolding controller: %v", err)
 		}

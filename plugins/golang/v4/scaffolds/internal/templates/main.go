@@ -33,7 +33,6 @@ type Main struct {
 	machinery.BoilerplateMixin
 	machinery.DomainMixin
 	machinery.RepositoryMixin
-	machinery.ComponentConfigMixin
 }
 
 // SetTemplateDefaults implements file.Template
@@ -98,16 +97,16 @@ const (
 	addschemeCodeFragment = `utilruntime.Must(%s.AddToScheme(scheme))
 `
 	reconcilerSetupCodeFragment = `if err = (&controller.%sReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		MaxConcurrentReconciles: concurrent,
+		RateLimiter: utilcontroller.GetRateLimiter(rateLimiterOptions),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "%s")
 		os.Exit(1)
 	}
 `
 	multiGroupReconcilerSetupCodeFragment = `if err = (&%scontroller.%sReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		MaxConcurrentReconciles: concurrent,
+		RateLimiter: utilcontroller.GetRateLimiter(rateLimiterOptions),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "%s")
 		os.Exit(1)
@@ -199,6 +198,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	%s
+	utilcontroller "github.com/labring/endpoints-operator/library/controller"
 )
 
 var (
@@ -213,22 +213,20 @@ func init() {
 }
 
 func main() {
-{{- if not .ComponentConfig }}
-	var metricsAddr string
-	var enableLeaderElection bool
-	var probeAddr string
+	var (
+		metricsAddr          string
+		enableLeaderElection bool
+		probeAddr            string
+		concurrent           int
+		rateLimiterOptions   utilcontroller.RateLimiterOptions
+	)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. " +
 		"Enabling this will ensure there is only one active controller manager.")
-{{- else }}
-  var configFile string
-	flag.StringVar(&configFile, "config", "", 
-		"The controller will load its initial configuration from this file. " +
-		"Omit this flag to use the default configuration values. " +
-		"Command-line flags override configuration from this file.")
-{{- end }}
+	flag.IntVar(&concurrent, "concurrent", 5, "The number of concurrent cluster reconciles.")
+	rateLimiterOptions.BindFlags(flag.CommandLine)
 	opts := zap.Options{
 		Development: true,
 	}
@@ -237,7 +235,6 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
-{{ if not .ComponentConfig }}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -257,25 +254,16 @@ func main() {
 		// after the manager stops then its usage might be unsafe.
 		// LeaderElectionReleaseOnCancel: true,
 	})
-{{- else }}
-	var err error
-	options := ctrl.Options{Scheme: scheme}
-	if configFile != "" {
-		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(configFile))
-		if err != nil {
-			setupLog.Error(err, "unable to load the config file")
-			os.Exit(1)
-		}
-	}
-
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
-{{- end }}
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
-	%s
+	
+	if os.Getenv("DISABLE_WEBHOOKS") == "true" {
+		setupLog.Info("disable all webhooks")
+	} else {
+		%s
+	}
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")

@@ -14,25 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package v3
 
 import (
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
 )
 
-var _ plugin.CreateWebhookSubcommand = &createWebhookSubcommand{}
+var _ plugin.CreateAPISubcommand = &createAPISubcommand{}
 
-type createWebhookSubcommand struct {
+type createAPISubcommand struct {
 	createSubcommand
 }
 
-func (p *createWebhookSubcommand) Scaffold(fs machinery.Filesystem) error {
+func (p *createAPISubcommand) Scaffold(fs machinery.Filesystem) error {
 	if err := p.configure(); err != nil {
 		return err
 	}
-	scaffolder := scaffolds.NewWebhookScaffolder(p.config, *p.resource, p.force)
+	scaffolder := scaffolds.NewAPIScaffolder(p.config, *p.resource, p.force)
 	scaffolder.InjectFS(fs)
 	return scaffolder.Scaffold()
 }

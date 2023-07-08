@@ -19,9 +19,9 @@ package scaffolds
 import (
 	"fmt"
 
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/certmanager"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/kdefault"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds/internal/templates/config/webhook"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/certmanager"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/kdefault"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/webhook"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"

@@ -34,10 +34,12 @@ type Makefile struct {
 	BoilerplatePath string
 	// Controller tools version to use in the project
 	ControllerToolsVersion string
-	// Kustomize version to use in the project
-	KustomizeVersion string
+	// Helm version to use in the project
+	HelmVersion string
 	// ControllerRuntimeVersion version to be used to download the envtest setup script
 	ControllerRuntimeVersion string
+	// EndpointOperatorLibVersion version to be used to download the envtest setup script
+	EndpointOperatorLibVersion string
 }
 
 // SetTemplateDefaults implements file.Template
@@ -173,21 +175,20 @@ ifndef ignore-not-found
 endif
 
 .PHONY: install
-install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | $(KUBECTL) apply -f -
+install: manifests ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+	$(KUBECTL) apply -f config/charts/{{ .ProjectName }}/crds
 
 .PHONY: uninstall
-uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
-	$(KUSTOMIZE) build config/crd | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
+uninstall: manifests ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
+	$(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f config/charts/{{ .ProjectName }}/crds
 
 .PHONY: deploy
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | $(KUBECTL) apply -f -
+deploy: manifests helm ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	$(HELM) upgrade --install --namespace {{ .ProjectName }} {{ .ProjectName }} config/charts/{{ .ProjectName }} --set image=${IMG}
 
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
-	$(KUSTOMIZE) build config/default | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
+	$(HELM) uninstall --namespace {{ .ProjectName }} {{ .ProjectName }}
 
 ##@ Build Dependencies
 
@@ -198,22 +199,22 @@ $(LOCALBIN):
 
 ## Tool Binaries
 KUBECTL ?= kubectl
-KUSTOMIZE ?= $(LOCALBIN)/kustomize
+HELM ?= $(LOCALBIN)/helm
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
-KUSTOMIZE_VERSION ?= {{ .KustomizeVersion }}
+HELM_VERSION ?= {{ .HelmVersion }}
 CONTROLLER_TOOLS_VERSION ?= {{ .ControllerToolsVersion }}
 
-.PHONY: kustomize
-kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary. If wrong version is installed, it will be removed before downloading.
-$(KUSTOMIZE): $(LOCALBIN)
-	@if test -x $(LOCALBIN)/kustomize && ! $(LOCALBIN)/kustomize version | grep -q $(KUSTOMIZE_VERSION); then \
-		echo "$(LOCALBIN)/kustomize version is not expected $(KUSTOMIZE_VERSION). Removing it before installing."; \
-		rm -rf $(LOCALBIN)/kustomize; \
+.PHONY: helm
+helm: $(HELM) ## Download helm locally if necessary. If wrong version is installed, it will be removed before downloading.
+$(HELM): $(LOCALBIN)
+	@if test -x $(LOCALBIN)/helm && ! $(LOCALBIN)/helm version --short --client | grep -q $(HELM_VERSION); then \
+		echo "$(LOCALBIN)/helm version is not expected $(HELM_VERSION). Removing it before installing."; \
+		rm -rf $(LOCALBIN)/helm; \
 	fi
-	test -s $(LOCALBIN)/kustomize || GOBIN=$(LOCALBIN) GO111MODULE=on go install sigs.k8s.io/kustomize/kustomize/v5@$(KUSTOMIZE_VERSION)
+	test -s $(LOCALBIN)/helm ||curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && HELM_INSTALL_DIR=$(LOCALBIN)  ./get_helm.sh --version $(HELM_VERSION) --no-sudo && rm -f get_helm.sh
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.
