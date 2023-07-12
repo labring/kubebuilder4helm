@@ -18,10 +18,8 @@ package scaffolds
 
 import (
 	"fmt"
+	rbac2 "github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/rbac"
 
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/crd"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/crd/patches"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/rbac"
 	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/samples"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
@@ -72,22 +70,12 @@ func (s *apiScaffolder) Scaffold() error {
 	if s.resource.HasAPI() {
 		if err := scaffold.Execute(
 			&samples.CRDSample{Force: s.force},
-			&rbac.CRDEditorRole{},
-			&rbac.CRDViewerRole{},
-			&patches.EnableWebhookPatch{},
-			&patches.EnableCAInjectionPatch{},
-			&crd.Kustomization{},
-			&crd.KustomizeConfig{},
+			&rbac2.CRDEditorRole{},
+			&rbac2.CRDViewerRole{},
 		); err != nil {
 			return fmt.Errorf("error scaffolding kustomize API manifests: %v", err)
 		}
 
-		// If the gvk is non-empty
-		if s.resource.Group != "" || s.resource.Version != "" || s.resource.Kind != "" {
-			if err := scaffold.Execute(&samples.Kustomization{}); err != nil {
-				return fmt.Errorf("error scaffolding manifests: %v", err)
-			}
-		}
 	}
 
 	return nil

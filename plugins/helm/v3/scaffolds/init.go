@@ -18,11 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
-
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/kdefault"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/manager"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/prometheus"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/rbac"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugins"
@@ -63,22 +59,23 @@ func (s *initScaffolder) Scaffold() error {
 	)
 
 	templates := []machinery.Builder{
-		&rbac.Kustomization{},
-		&rbac.AuthProxyRole{},
-		&rbac.AuthProxyRoleBinding{},
-		&rbac.AuthProxyService{},
-		&rbac.AuthProxyClientRole{},
-		&rbac.RoleBinding{},
-		&rbac.LeaderElectionRole{},
-		&rbac.LeaderElectionRoleBinding{},
-		&rbac.ServiceAccount{},
-		&manager.Kustomization{},
-		&manager.Config{Image: imageName},
-		&kdefault.Kustomization{},
-		&kdefault.ManagerAuthProxyPatch{},
-		&kdefault.ManagerConfigPatch{},
-		&prometheus.Kustomization{},
-		&prometheus.Monitor{},
+		//&rbac2.Kustomization{},
+		//&rbac2.AuthProxyRole{},
+		//&rbac2.AuthProxyRoleBinding{},
+		//&rbac2.AuthProxyService{},
+		//&rbac2.AuthProxyClientRole{},
+		//&rbac2.RoleBinding{},
+		//&rbac2.LeaderElectionRole{},
+		//&rbac2.LeaderElectionRoleBinding{},
+		//&rbac2.ServiceAccount{},
+		//&manager2.Kustomization{},
+		//&manager2.Config{Image: imageName},
+		//&kdefault2.Kustomization{},
+		//&kdefault2.ManagerAuthProxyPatch{},
+		//&kdefault2.ManagerConfigPatch{},
+		//&prometheus2.Kustomization{},
+		//&prometheus2.Monitor{},
+		&charts.HelmIgnore{},
 	}
 
 	return scaffold.Execute(templates...)
