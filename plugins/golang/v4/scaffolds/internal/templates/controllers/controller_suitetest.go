@@ -37,22 +37,35 @@ type SuiteTest struct {
 	// CRDDirectoryRelativePath define the Path for the CRD
 	CRDDirectoryRelativePath string
 
-	Force bool
+	Force          bool
+	IsLegacyLayout bool
+	PackageName    string
 }
 
 // SetTemplateDefaults implements file.Template
 func (f *SuiteTest) SetTemplateDefaults() error {
 	if f.Path == "" {
 		if f.MultiGroup && f.Resource.Group != "" {
-			f.Path = filepath.Join("internal", "controller", "%[group]", "suite_test.go")
+			if f.IsLegacyLayout {
+				f.Path = filepath.Join("controllers", "%[group]", "suite_test.go")
+			} else {
+				f.Path = filepath.Join("internal", "controller", "%[group]", "suite_test.go")
+			}
 		} else {
-			f.Path = filepath.Join("internal", "controller", "suite_test.go")
+			if f.IsLegacyLayout {
+				f.Path = filepath.Join("controllers", "suite_test.go")
+			} else {
+				f.Path = filepath.Join("internal", "controller", "suite_test.go")
+			}
 		}
 	}
 
 	f.Path = f.Resource.Replacer().Replace(f.Path)
 	fmt.Println(f.Path)
-
+	f.PackageName = "controller"
+	if f.IsLegacyLayout {
+		f.PackageName = "controllers"
+	}
 	f.TemplateBody = fmt.Sprintf(controllerSuiteTestTemplate,
 		machinery.NewMarkerFor(f.Path, importMarker),
 		machinery.NewMarkerFor(f.Path, addSchemeMarker),

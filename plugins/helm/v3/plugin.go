@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package v3
 
 import (
 	"github.com/labring/kubebuilder-helm/plugins"
@@ -24,13 +24,13 @@ import (
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
 )
 
-// KustomizeVersion is the kubernetes-sigs/kustomize version to be used in the project
-const KustomizeVersion = "v5.0.1"
+// HelmVersion is the helm/helm version to be used in the project
+const HelmVersion = "v3.12.1"
 
 const pluginName = "helm.common." + plugins.DefaultNameQualifier
 
 var (
-	pluginVersion            = plugin.Version{Number: 2, Stage: stage.Stable}
+	pluginVersion            = plugin.Version{Number: 3, Stage: stage.Stable}
 	supportedProjectVersions = []config.Version{cfgv3.Version}
 )
 

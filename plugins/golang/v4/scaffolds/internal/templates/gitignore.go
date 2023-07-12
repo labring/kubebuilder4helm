@@ -64,4 +64,5 @@ Dockerfile.cross
 *.swp
 *.swo
 *~
+get_helm.sh
 `

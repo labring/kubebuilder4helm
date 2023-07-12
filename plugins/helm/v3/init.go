@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1
+package v3
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/labring/kubebuilder-helm/plugins/helm/v1/scaffolds"
+	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
@@ -37,9 +37,8 @@ type initSubcommand struct {
 	config config.Config
 
 	// config options
-	domain          string
-	name            string
-	componentConfig bool
+	domain string
+	name   string
 }
 
 func (p *initSubcommand) UpdateMetadata(cliMeta plugin.CLIMetadata, subcmdMeta *plugin.SubcommandMetadata) {
@@ -60,8 +59,6 @@ NOTE: This plugin requires kustomize version v5 and kubectl >= 1.22.
 func (p *initSubcommand) BindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&p.domain, "domain", "my.domain", "domain for groups")
 	fs.StringVar(&p.name, "project-name", "", "name of this project")
-	fs.BoolVar(&p.componentConfig, "component-config", false,
-		"create a versioned ComponentConfig file, may be 'true' or 'false'")
 	_ = fs.MarkDeprecated("component-config", "the ComponentConfig has been deprecated in the "+
 		"Controller-Runtime since its version 0.15.0. Moreover, it has undergone breaking changes and is no longer "+
 		"functioning as intended. As a result, this tool, which heavily relies on the Controller Runtime, "+
@@ -90,12 +87,6 @@ func (p *initSubcommand) InjectConfig(c config.Config) error {
 	}
 	if err := p.config.SetProjectName(p.name); err != nil {
 		return err
-	}
-
-	if p.componentConfig {
-		if err := p.config.SetComponentConfig(); err != nil {
-			return err
-		}
 	}
 
 	return nil

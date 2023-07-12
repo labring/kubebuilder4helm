@@ -19,7 +19,7 @@ package main
 import (
 	"github.com/labring/kubebuilder-helm/plugins"
 	golangv4 "github.com/labring/kubebuilder-helm/plugins/golang/v4"
-	helmv1 "github.com/labring/kubebuilder-helm/plugins/helm/v1"
+	helmv1 "github.com/labring/kubebuilder-helm/plugins/helm/v3"
 	"log"
 	"sigs.k8s.io/kubebuilder/v3/pkg/cli"
 	cfgv3 "sigs.k8s.io/kubebuilder/v3/pkg/config/v3"

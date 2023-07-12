@@ -19,17 +19,14 @@ package scaffolds
 import (
 	"fmt"
 
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
-
 	"github.com/spf13/afero"
 
 	"github.com/labring/kubebuilder-helm/plugins/golang/v4/scaffolds/internal/templates"
 	"github.com/labring/kubebuilder-helm/plugins/golang/v4/scaffolds/internal/templates/hack"
+	helmv3 "github.com/labring/kubebuilder-helm/plugins/helm/v3"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugins"
-	kustomizecommonv1 "sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v1"
-	kustomizecommonv2alpha "sigs.k8s.io/kubebuilder/v3/pkg/plugins/common/kustomize/v2"
 )
 
 const (
@@ -37,13 +34,16 @@ const (
 	ControllerRuntimeVersion = "v0.15.0"
 	// ControllerToolsVersion is the kubernetes-sigs/controller-tools version to be used in the project
 	ControllerToolsVersion = "v0.12.0"
+	// EndpointOperatorLibVersion is the labring/endpoint-operator version to be used in the project
+	EndpointOperatorLibVersion = "v0.2.2-rc7"
+	EndpointOperatorCommit     = "33416b6"
 
 	imageName = "controller:latest"
 )
 
 var _ plugins.Scaffolder = &initScaffolder{}
 
-var kustomizeVersion string
+var helmVersion string
 
 type initScaffolder struct {
 	config          config.Config
@@ -111,30 +111,32 @@ func (s *initScaffolder) Scaffold() error {
 	// If the KustomizeV2 was used to do the scaffold then
 	// we need to ensure that we use its supported Kustomize Version
 	// in order to support it
-	kustomizeVersion = kustomizecommonv1.KustomizeVersion
-	kustomizev2 := kustomizecommonv2alpha.Plugin{}
-	gov4 := "go.kubebuilder.io/v4"
-	pluginKeyForKustomizeV2 := plugin.KeyFor(kustomizev2)
-
-	for _, pluginKey := range s.config.GetPluginChain() {
-		if pluginKey == pluginKeyForKustomizeV2 || pluginKey == gov4 {
-			kustomizeVersion = kustomizecommonv2alpha.KustomizeVersion
-			break
-		}
-	}
+	helmVersion = helmv3.HelmVersion
+	//helm := helmv3.Plugin{}
+	//gov4 := "go.kubebuilder.io/v4"
+	//pluginKeyForKustomizeV2 := plugin.KeyFor(helm)
+	//
+	//for _, pluginKey := range s.config.GetPluginChain() {
+	//	if pluginKey == pluginKeyForKustomizeV2 || pluginKey == gov4 {
+	//		kustomizeVersion = kustomizecommonv2alpha.HelmVersion
+	//		break
+	//	}
+	//}
 
 	return scaffold.Execute(
 		&templates.Main{},
 		&templates.GoMod{
-			ControllerRuntimeVersion: ControllerRuntimeVersion,
+			ControllerRuntimeVersion:   ControllerRuntimeVersion,
+			EndpointOperatorLibVersion: EndpointOperatorCommit,
 		},
 		&templates.GitIgnore{},
 		&templates.Makefile{
-			Image:                    imageName,
-			BoilerplatePath:          s.boilerplatePath,
-			ControllerToolsVersion:   ControllerToolsVersion,
-			KustomizeVersion:         kustomizeVersion,
-			ControllerRuntimeVersion: ControllerRuntimeVersion,
+			Image:                      imageName,
+			BoilerplatePath:            s.boilerplatePath,
+			ControllerToolsVersion:     ControllerToolsVersion,
+			HelmVersion:                helmVersion,
+			ControllerRuntimeVersion:   ControllerRuntimeVersion,
+			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
 		},
 		&templates.Dockerfile{},
 		&templates.DockerIgnore{},

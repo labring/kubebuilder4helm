@@ -140,7 +140,11 @@ func (p *initSubcommand) Scaffold(fs machinery.Filesystem) error {
 	if err != nil {
 		return err
 	}
-
+	err = util.RunCmd("Get endpoint lib", "go", "get",
+		"github.com/labring/endpoints-operator/library@"+scaffolds.EndpointOperatorCommit)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

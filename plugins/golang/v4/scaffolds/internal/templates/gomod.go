@@ -27,7 +27,8 @@ type GoMod struct {
 	machinery.TemplateMixin
 	machinery.RepositoryMixin
 
-	ControllerRuntimeVersion string
+	ControllerRuntimeVersion   string
+	EndpointOperatorLibVersion string
 }
 
 // SetTemplateDefaults implements file.Template
@@ -50,5 +51,6 @@ go 1.20
 
 require (
 	sigs.k8s.io/controller-runtime {{ .ControllerRuntimeVersion }}
+	github.com/labring/endpoints-operator/library {{ .EndpointOperatorLibVersion }}
 )
 `
