@@ -19,6 +19,7 @@ package scaffolds
 import (
 	"fmt"
 	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts"
+	templates2 "github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugins"
@@ -51,7 +52,7 @@ func (s *initScaffolder) InjectFS(fs machinery.Filesystem) {
 
 // Scaffold implements cmdutil.Scaffolder
 func (s *initScaffolder) Scaffold() error {
-	fmt.Println("Writing kustomize manifests for you to edit...")
+	fmt.Println("Writing helm manifests for you to edit...")
 
 	// Initialize the machinery.Scaffold that will write the files to disk
 	scaffold := machinery.NewScaffold(s.fs,
@@ -75,7 +76,10 @@ func (s *initScaffolder) Scaffold() error {
 		//&kdefault2.ManagerConfigPatch{},
 		//&prometheus2.Kustomization{},
 		//&prometheus2.Monitor{},
+		&charts.Chart{},
 		&charts.HelmIgnore{},
+		&charts.Values{},
+		&templates2.Helpers{},
 	}
 
 	return scaffold.Execute(templates...)
