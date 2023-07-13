@@ -19,7 +19,6 @@ package scaffolds
 import (
 	"fmt"
 	templates2 "github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates"
-	templates "github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/pre-check"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
@@ -53,7 +52,7 @@ func (s *webhookScaffolder) InjectFS(fs machinery.Filesystem) { s.fs = fs }
 
 // Scaffold implements cmdutil.Scaffolder
 func (s *webhookScaffolder) Scaffold() error {
-	fmt.Println("Writing kustomize manifests for you to edit...")
+	fmt.Println("Writing helm manifests for you to edit...")
 
 	// Initialize the machinery.Scaffold that will write the files to disk
 	scaffold := machinery.NewScaffold(s.fs,
@@ -67,15 +66,16 @@ func (s *webhookScaffolder) Scaffold() error {
 
 	if err := scaffold.Execute(
 		&templates2.Helpers{Force: true, WebhookEnabled: true},
-		&templates.CertManagerCheck{Force: s.force},
+		&templates2.CertManagerCheck{Force: s.force},
+		&templates2.WebhookService{Force: s.force},
+		&templates2.Certificate{Force: s.force},
 		//&kdefault.WebhookCAInjectionPatch{},
 		//&kdefault.ManagerWebhookPatch{},
 		//&webhook.KustomizeConfig{},
-		//&webhook.Service{},
-		//&certmanager.Certificate{},
+
 		//&certmanager.KustomizeConfig{},
 	); err != nil {
-		return fmt.Errorf("error scaffolding kustomize webhook manifests: %v", err)
+		return fmt.Errorf("error scaffolding helm webhook manifests: %v", err)
 	}
 
 	return nil

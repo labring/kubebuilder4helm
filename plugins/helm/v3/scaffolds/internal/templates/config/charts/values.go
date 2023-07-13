@@ -37,7 +37,7 @@ type Values struct {
 // SetTemplateDefaults implements file.Template
 func (f *Values) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "values.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "values.yaml")
 	}
 
 	f.GithubDockerRepo = strings.Join(strings.Split(f.Repo, "/")[:2], "/")
@@ -66,4 +66,6 @@ image:
   image: {{ .ProjectName }}
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+
+prometheus: false
 `

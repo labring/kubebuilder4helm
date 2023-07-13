@@ -80,6 +80,8 @@ func (s *initScaffolder) Scaffold() error {
 		&charts.HelmIgnore{},
 		&charts.Values{},
 		&templates2.Helpers{},
+		&templates2.MonitorService{Force: true},
+		&templates2.Monitor{Force: true},
 	}
 
 	return scaffold.Execute(templates...)

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package certmanager
+package templates
 
 import (
 	"path/filepath"
@@ -28,59 +28,52 @@ var _ machinery.Template = &Certificate{}
 type Certificate struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
+	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
 func (f *Certificate) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "certmanager", "certificate.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "certificate.yaml")
 	}
-
+	f.SetDelim("[[", "]]")
 	f.TemplateBody = certManagerTemplate
 
-	// If file exists (ex. because a webhook was already created), skip creation.
-	f.IfExistsAction = machinery.SkipFile
-
+	if f.Force {
+		f.IfExistsAction = machinery.OverwriteFile
+	} else {
+		// If file exists (ex. because a monitor was already created), skip creation.
+		f.IfExistsAction = machinery.SkipFile
+	}
 	return nil
 }
 
-const certManagerTemplate = `# The following manifests contain a self-signed issuer CR and a certificate CR.
+const certManagerTemplate = `{{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
+# The following manifests contain a self-signed issuer CR and a certificate CR.
 # More document can be found at https://docs.cert-manager.io
 # WARNING: Targets CertManager v1.0. Check https://cert-manager.io/docs/installation/upgrading/ for breaking changes.
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-selfsigned-issuer
   labels:
-    app.kubernetes.io/name: certificate
-    app.kubernetes.io/instance: serving-cert
-    app.kubernetes.io/component: certificate
-    app.kubernetes.io/created-by: {{ .ProjectName }}
-    app.kubernetes.io/part-of: {{ .ProjectName }}
-    app.kubernetes.io/managed-by: kustomize
-  name: selfsigned-issuer
-  namespace: system
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
 spec:
   selfSigned: {}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-serving-cert
   labels:
-    app.kubernetes.io/name: certificate
-    app.kubernetes.io/instance: serving-cert
-    app.kubernetes.io/component: certificate
-    app.kubernetes.io/created-by: {{ .ProjectName }}
-    app.kubernetes.io/part-of: {{ .ProjectName }}
-    app.kubernetes.io/managed-by: kustomize
-  name: serving-cert  # this name should match the one appeared in kustomizeconfig.yaml
-  namespace: system
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
 spec:
-  # SERVICE_NAME and SERVICE_NAMESPACE will be substituted by kustomize
   dnsNames:
-  - SERVICE_NAME.SERVICE_NAMESPACE.svc
-  - SERVICE_NAME.SERVICE_NAMESPACE.svc.cluster.local
+  - {{ include "[[ .ProjectName ]].fullname" . }}-webhook-service.{{.Release.Namespace}}.svc
+  - {{ include "[[ .ProjectName ]].fullname" . }}-webhook-service.{{.Release.Namespace}}.svc.cluster.local
   issuerRef:
     kind: Issuer
-    name: selfsigned-issuer
-  secretName: webhook-server-cert # this secret will not be prefixed, since it's not managed by kustomize
+    name: {{ include "[[ .ProjectName ]].fullname" . }}-selfsigned-issuer
+  secretName: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-server-cert 
+{{- end }}
 `

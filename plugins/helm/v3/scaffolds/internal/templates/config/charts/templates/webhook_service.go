@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package charts
+package templates
 
 import (
 	"path/filepath"
@@ -22,23 +22,22 @@ import (
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-var _ machinery.Template = &HelmIgnore{}
+var _ machinery.Template = &WebhookService{}
 
-// HelmIgnore scaffolds a file that defines the kustomization scheme for the webhook folder
-type HelmIgnore struct {
+// WebhookService scaffolds a file that defines the webhook service
+type WebhookService struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
-
 	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
-func (f *HelmIgnore) SetTemplateDefaults() error {
+func (f *WebhookService) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", f.ProjectName, ".helmignore")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "webhook-service.yaml")
 	}
-
-	f.TemplateBody = helmIgnoreTemplate
+	f.SetDelim("[[", "]]")
+	f.TemplateBody = webhookServiceTemplate
 
 	if f.Force {
 		f.IfExistsAction = machinery.OverwriteFile
@@ -46,32 +45,23 @@ func (f *HelmIgnore) SetTemplateDefaults() error {
 		// If file exists (ex. because a webhook was already created), skip creation.
 		f.IfExistsAction = machinery.SkipFile
 	}
-
 	return nil
 }
 
-const helmIgnoreTemplate = `# Patterns to ignore when building packages.
-# This supports shell glob matching, relative path matching, and
-# negation (prefixed with !). Only one pattern per line.
-.DS_Store
-# Common VCS dirs
-.git/
-.gitignore
-.bzr/
-.bzrignore
-.hg/
-.hgignore
-.svn/
-# Common backup files
-*.swp
-*.bak
-*.tmp
-*.orig
-*~
-# Various IDEs
-.project
-.idea/
-*.tmproj
-.vscode/
-
+const webhookServiceTemplate = `{{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-service
+  labels:
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: 443
+      targetPort: 9443
+      protocol: TCP
+      name: webhook
+  selector:
+    {{- include "[[ .ProjectName ]].selectorLabels" . | nindent 4 }}
+{{- end }}
 `

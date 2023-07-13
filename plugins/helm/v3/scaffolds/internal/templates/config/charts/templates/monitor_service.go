@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package charts
+package templates
 
 import (
 	"path/filepath"
@@ -22,56 +22,46 @@ import (
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-var _ machinery.Template = &HelmIgnore{}
+var _ machinery.Template = &MonitorService{}
 
-// HelmIgnore scaffolds a file that defines the kustomization scheme for the webhook folder
-type HelmIgnore struct {
+// MonitorService scaffolds a file that defines the monitor service
+type MonitorService struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
-
 	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
-func (f *HelmIgnore) SetTemplateDefaults() error {
+func (f *MonitorService) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", f.ProjectName, ".helmignore")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "monitor-service.yaml")
 	}
-
-	f.TemplateBody = helmIgnoreTemplate
+	f.SetDelim("[[", "]]")
+	f.TemplateBody = monitorServiceTemplate
 
 	if f.Force {
 		f.IfExistsAction = machinery.OverwriteFile
 	} else {
-		// If file exists (ex. because a webhook was already created), skip creation.
+		// If file exists (ex. because a monitor was already created), skip creation.
 		f.IfExistsAction = machinery.SkipFile
 	}
-
 	return nil
 }
 
-const helmIgnoreTemplate = `# Patterns to ignore when building packages.
-# This supports shell glob matching, relative path matching, and
-# negation (prefixed with !). Only one pattern per line.
-.DS_Store
-# Common VCS dirs
-.git/
-.gitignore
-.bzr/
-.bzrignore
-.hg/
-.hgignore
-.svn/
-# Common backup files
-*.swp
-*.bak
-*.tmp
-*.orig
-*~
-# Various IDEs
-.project
-.idea/
-*.tmproj
-.vscode/
-
+const monitorServiceTemplate = `{{- if .Values.prometheus -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-monitor-service
+  labels:
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: 8443
+      targetPort: https
+      protocol: TCP
+      name: https
+  selector:
+    {{- include "[[ .ProjectName ]].selectorLabels" . | nindent 4 }}
+{{- end }}
 `

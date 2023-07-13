@@ -37,7 +37,7 @@ type Helpers struct {
 // SetTemplateDefaults implements file.Template
 func (f *Helpers) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "_helpers.tpl")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "_helpers.tpl")
 	}
 	f.SetDelim("[[", "]]")
 
