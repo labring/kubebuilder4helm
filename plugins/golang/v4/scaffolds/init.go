@@ -34,9 +34,8 @@ const (
 	ControllerRuntimeVersion = "v0.15.0"
 	// ControllerToolsVersion is the kubernetes-sigs/controller-tools version to be used in the project
 	ControllerToolsVersion = "v0.12.0"
-	// EndpointOperatorLibVersion is the labring/endpoint-operator version to be used in the project
-	EndpointOperatorLibVersion = "v0.2.2-rc7"
-	EndpointOperatorCommit     = "33416b6"
+	// EndpointOperatorLibVersion is the labring/operator-sdk version to be used in the project
+	EndpointOperatorLibVersion = "v1.0.0"
 
 	imageName = "controller:latest"
 )
@@ -127,7 +126,7 @@ func (s *initScaffolder) Scaffold() error {
 		&templates.Main{},
 		&templates.GoMod{
 			ControllerRuntimeVersion:   ControllerRuntimeVersion,
-			EndpointOperatorLibVersion: EndpointOperatorCommit,
+			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
 		},
 		&templates.GitIgnore{},
 		&templates.Makefile{

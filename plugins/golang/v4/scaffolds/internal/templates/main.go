@@ -112,9 +112,13 @@ const (
 		os.Exit(1)
 	}
 `
-	webhookSetupCodeFragment = `if err = (&%s.%s{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "%s")
-		os.Exit(1)
+	webhookSetupCodeFragment = `if os.Getenv("DISABLE_WEBHOOKS") != "true" {
+		if err = (&%s.%s{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "%s")
+			os.Exit(1)
+		}else{
+			setupLog.Info("webhook disable", "webhook", "%s")
+		}
 	}
 `
 )
@@ -162,7 +166,7 @@ func (f *MainUpdater) GetCodeFragments() machinery.CodeFragmentsMap {
 	}
 	if f.WireWebhook {
 		setup = append(setup, fmt.Sprintf(webhookSetupCodeFragment,
-			f.Resource.ImportAlias(), f.Resource.Kind, f.Resource.Kind))
+			f.Resource.ImportAlias(), f.Resource.Kind, f.Resource.Kind, f.Resource.Kind))
 	}
 
 	// Only store code fragments in the map if the slices are non-empty
@@ -198,7 +202,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	%s
-	utilcontroller "github.com/labring/endpoints-operator/library/controller"
+	utilcontroller "github.com/labring/operator-sdk/controller"
 )
 
 var (
@@ -259,12 +263,8 @@ func main() {
 		os.Exit(1)
 	}
 	
-	if os.Getenv("DISABLE_WEBHOOKS") == "true" {
-		setupLog.Info("disable all webhooks")
-	} else {
-		%s
-	}
-
+	%s
+	
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)

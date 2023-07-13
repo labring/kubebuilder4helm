@@ -51,6 +51,6 @@ go 1.20
 
 require (
 	sigs.k8s.io/controller-runtime {{ .ControllerRuntimeVersion }}
-	github.com/labring/endpoints-operator/library {{ .EndpointOperatorLibVersion }}
+	github.com/labring/operator-sdk {{ .EndpointOperatorLibVersion }}
 )
 `

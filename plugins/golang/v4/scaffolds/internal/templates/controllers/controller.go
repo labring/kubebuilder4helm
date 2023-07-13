@@ -95,7 +95,7 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"github.com/labring/endpoints-operator/library/controller"
+	"github.com/labring/operator-sdk/controller"
 	{{ if not (isEmptyStr .Resource.Path) -}}
 	{{ .Resource.ImportAlias }} "{{ .Resource.Path }}"
 	{{- end }}
@@ -115,7 +115,7 @@ type {{ .Resource.Kind }}Reconciler struct {
 	Scheme *runtime.Scheme
 	Recorder record.EventRecorder
 	// For more details
-	// - https://github.com/labring/endpoints-operator/blob/{{ .EndpointOperatorLibVersion }}/library/controller/finalizer.go
+	// - https://github.com/labring/operator-sdk/blob/{{ .EndpointOperatorLibVersion }}/controller/finalizer.go
 	finalizer *controller.Finalizer
 	MaxConcurrentReconciles int
 	RateLimiter             ratelimiter.RateLimiter
