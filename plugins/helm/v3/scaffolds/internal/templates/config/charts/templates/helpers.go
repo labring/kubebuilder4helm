@@ -17,8 +17,10 @@ limitations under the License.
 package templates
 
 import (
+	"fmt"
 	"path/filepath"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
+	"text/template"
 )
 
 var _ machinery.Template = &Helpers{}
@@ -28,7 +30,8 @@ type Helpers struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
 	machinery.RepositoryMixin
-	Force bool
+	Force          bool
+	WebhookEnabled bool
 }
 
 // SetTemplateDefaults implements file.Template
@@ -36,9 +39,9 @@ func (f *Helpers) SetTemplateDefaults() error {
 	if f.Path == "" {
 		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "_helpers.tpl")
 	}
+	f.SetDelim("[[", "]]")
 
 	f.TemplateBody = helpersTemplate
-
 	if f.Force {
 		f.IfExistsAction = machinery.OverwriteFile
 	} else {
@@ -49,55 +52,68 @@ func (f *Helpers) SetTemplateDefaults() error {
 	return nil
 }
 
-const helpersTemplate = `{{"{{"}}/*
+// GetFuncMap implements file.UseCustomFuncMap
+func (f *Helpers) GetFuncMap() template.FuncMap {
+	funcMap := machinery.DefaultFuncMap()
+	funcMap["JSONTag"] = func(tag string) string {
+		return fmt.Sprintf("`json:%q`", tag)
+	}
+	return funcMap
+}
+
+const helpersTemplate = `{{/*
 Expand the name of the chart.
 */}}
-{{"{{"}}- define "{{ .ProjectName }}.name" -}}
-{{"{{"}}- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-{{"{{"}}- end }}
+{{- define "[[ .ProjectName ]].name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
-{{"{{"}}/*
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{"{{"}}- define "{{ .ProjectName }}.fullname" -}}
-{{"{{"}}- if .Values.fullnameOverride }}
-{{"{{"}}- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{"{{"}}- else }}
-{{"{{"}}- $name := default .Chart.Name .Values.nameOverride }}
-{{"{{"}}- if contains $name .Release.Name }}
-{{"{{"}}- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{"{{"}}- else }}
-{{"{{"}}- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{"{{"}}- end }}
-{{"{{"}}- end }}
-{{"{{"}}- end }}
+{{- define "[[ .ProjectName ]].fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
 
-{{"{{"}}/*
+{{/*
 Create chart name and version as used by the chart label.
 */}}
-{{"{{"}}- define "{{ .ProjectName }}.chart" -}}
-{{"{{"}}- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{"{{"}}- end }}
+{{- define "[[ .ProjectName ]].chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
-{{"{{"}}/*
+{{/*
 Common labels
 */}}
-{{"{{"}}- define "{{ .ProjectName }}.labels" -}}
-helm.sh/chart: {{"{{"}} include "{{ .ProjectName }}.chart" . }}
-{{"{{"}} include "{{ .ProjectName }}.selectorLabels" . }}
-{{"{{"}}- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{"{{"}} .Chart.AppVersion | quote }}
-{{"{{"}}- end }}
-app.kubernetes.io/managed-by: {{"{{"}} .Release.Service }}
-{{"{{"}}- end }}
+{{- define "[[ .ProjectName ]].labels" -}}
+helm.sh/chart: {{ include "[[ .ProjectName ]].chart" . }}
+{{ include "[[ .ProjectName ]].selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
 
-{{"{{"}}/*
+{{/*
 Selector labels
 */}}
-{{"{{"}}- define "{{ .ProjectName }}.selectorLabels" -}}
-app.kubernetes.io/name: {{"{{"}} include "{{ .ProjectName }}.name" . }}
-app.kubernetes.io/instance: {{"{{"}} .Release.Name }}
-{{"{{"}}- end }}
+{{- define "[[ .ProjectName ]].selectorLabels" -}}
+app.kubernetes.io/name: {{ include "[[ .ProjectName ]].name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "[[ .ProjectName ]].webhookEnabled" }}
+{{- "[[ .WebhookEnabled ]]" }}
+{{- end }}
 `
