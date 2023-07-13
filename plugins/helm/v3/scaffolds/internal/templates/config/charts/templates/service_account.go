@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package rbac
+package templates
 
 import (
 	"path/filepath"
@@ -28,6 +28,7 @@ var _ machinery.Template = &ServiceAccount{}
 type ServiceAccount struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
+	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
@@ -37,20 +38,20 @@ func (f *ServiceAccount) SetTemplateDefaults() error {
 	}
 
 	f.TemplateBody = serviceAccountTemplate
-
+	f.SetDelim("[[", "]]")
+	if f.Force {
+		f.IfExistsAction = machinery.OverwriteFile
+	} else {
+		// If file exists (ex. because a monitor was already created), skip creation.
+		f.IfExistsAction = machinery.SkipFile
+	}
 	return nil
 }
 
 const serviceAccountTemplate = `apiVersion: v1
 kind: ServiceAccount
 metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}
   labels:
-    app.kubernetes.io/name: serviceaccount
-    app.kubernetes.io/instance: controller-manager-sa
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: {{ .ProjectName }}
-    app.kubernetes.io/part-of: {{ .ProjectName }}
-    app.kubernetes.io/managed-by: kustomize
-  name: controller-manager
-  namespace: system
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
 `
