@@ -36,7 +36,7 @@ func (f *CertManagerCheck) SetTemplateDefaults() error {
 	if f.Path == "" {
 		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "cert-manager-check.yaml")
 	}
-
+	f.SetDelim("[[", "]]")
 	f.TemplateBody = certManagerCheckTemplate
 
 	if f.Force {
@@ -49,10 +49,11 @@ func (f *CertManagerCheck) SetTemplateDefaults() error {
 	return nil
 }
 
-const certManagerCheckTemplate = `apiVersion: batch/v1
+const certManagerCheckTemplate = `{{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
+apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{"{{"}} .Release.Name }}-cert-manager-check"
+  name: "{{ .Release.Name }}-cert-manager-check"
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-5"
@@ -60,15 +61,15 @@ metadata:
 spec:
   template:
     metadata:
-      name: "{{"{{"}} .Release.Name }}-cert-manager-check"
+      name: "{{ .Release.Name }}-cert-manager-check"
       labels:
-        app: "{{"{{"}} .Chart.Name }}"
-        release: "{{"{{"}} .Release.Name }}"
+        app: "{{ .Chart.Name }}"
+        release: "{{ .Release.Name }}"
     spec:
       restartPolicy: Never
       containers:
         - name: cert-manager-check
           image: busybox:latest
           command: ["sh", "-c", "until echo exit | telnet cert-manager-webhook.cert-manager.svc 443; do echo waiting for cert-manager; sleep 10; done;"]
-
+{{- end }}
 `

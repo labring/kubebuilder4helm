@@ -18,8 +18,6 @@ package scaffolds
 
 import (
 	"fmt"
-	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/rbac"
-
 	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/samples"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
@@ -70,8 +68,8 @@ func (s *apiScaffolder) Scaffold() error {
 	if s.resource.HasAPI() {
 		if err := scaffold.Execute(
 			&samples.CRDSample{Force: s.force},
-			&rbac.CRDEditorRole{},
-			&rbac.CRDViewerRole{},
+			//&rbac.CRDEditorRole{},
+			//&rbac.CRDViewerRole{},
 		); err != nil {
 			return fmt.Errorf("error scaffolding kustomize API manifests: %v", err)
 		}
