@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: 0.2.1
+description: kubernetes endpoints balance for outsite apiserver
+home: https://github.com/labring/endpoints-operator
+keywords:
+- endpoints-operator
+kubeVersion: '>=1.16.0-0'
+name: endpoints-operator
+sources:
+- https://github.com/labring/endpoints-operator
+type: application
+version: 0.2.1
