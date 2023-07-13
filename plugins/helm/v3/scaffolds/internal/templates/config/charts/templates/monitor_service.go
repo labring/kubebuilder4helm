@@ -34,7 +34,7 @@ type MonitorService struct {
 // SetTemplateDefaults implements file.Template
 func (f *MonitorService) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "monitor-service.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "monitor-service.yaml")
 	}
 	f.SetDelim("[[", "]]")
 	f.TemplateBody = monitorServiceTemplate

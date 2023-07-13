@@ -35,7 +35,7 @@ type HelmIgnore struct {
 // SetTemplateDefaults implements file.Template
 func (f *HelmIgnore) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, ".helmignore")
+		f.Path = filepath.Join("config", f.ProjectName, ".helmignore")
 	}
 
 	f.TemplateBody = helmIgnoreTemplate

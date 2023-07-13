@@ -35,7 +35,7 @@ type Chart struct {
 // SetTemplateDefaults implements file.Template
 func (f *Chart) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "Chart.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "Chart.yaml")
 	}
 
 	f.TemplateBody = chartTemplate

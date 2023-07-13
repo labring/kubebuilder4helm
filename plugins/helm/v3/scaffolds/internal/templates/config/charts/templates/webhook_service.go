@@ -34,7 +34,7 @@ type WebhookService struct {
 // SetTemplateDefaults implements file.Template
 func (f *WebhookService) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "webhook-service.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "webhook-service.yaml")
 	}
 	f.SetDelim("[[", "]]")
 	f.TemplateBody = webhookServiceTemplate

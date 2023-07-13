@@ -34,7 +34,7 @@ type Certificate struct {
 // SetTemplateDefaults implements file.Template
 func (f *Certificate) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "certificate.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "certificate.yaml")
 	}
 	f.SetDelim("[[", "]]")
 	f.TemplateBody = certManagerTemplate

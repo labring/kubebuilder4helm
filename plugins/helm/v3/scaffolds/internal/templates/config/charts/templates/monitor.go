@@ -34,7 +34,7 @@ type Monitor struct {
 // SetTemplateDefaults implements file.Template
 func (f *Monitor) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "monitor.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "monitor.yaml")
 	}
 	f.SetDelim("[[", "]]")
 

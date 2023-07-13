@@ -52,7 +52,7 @@ func (s *webhookScaffolder) InjectFS(fs machinery.Filesystem) { s.fs = fs }
 
 // Scaffold implements cmdutil.Scaffolder
 func (s *webhookScaffolder) Scaffold() error {
-	fmt.Println("Writing kustomize manifests for you to edit...")
+	fmt.Println("Writing helm manifests for you to edit...")
 
 	// Initialize the machinery.Scaffold that will write the files to disk
 	scaffold := machinery.NewScaffold(s.fs,
@@ -75,7 +75,7 @@ func (s *webhookScaffolder) Scaffold() error {
 
 		//&certmanager.KustomizeConfig{},
 	); err != nil {
-		return fmt.Errorf("error scaffolding kustomize webhook manifests: %v", err)
+		return fmt.Errorf("error scaffolding helm webhook manifests: %v", err)
 	}
 
 	return nil
