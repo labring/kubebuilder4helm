@@ -18,8 +18,8 @@ package scaffolds
 
 import (
 	"fmt"
-	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts"
-	templates2 "github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/chart"
+	templates2 "github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/chart/templates"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugins"
@@ -76,12 +76,13 @@ func (s *initScaffolder) Scaffold() error {
 		//&kdefault2.ManagerConfigPatch{},
 		//&prometheus2.Kustomization{},
 		//&prometheus2.Monitor{},
-		&charts.Chart{},
-		&charts.HelmIgnore{},
-		&charts.Values{},
+		&chart.Chart{},
+		&chart.HelmIgnore{},
+		&chart.Values{},
 		&templates2.Helpers{},
 		&templates2.MonitorService{Force: true},
 		&templates2.Monitor{Force: true},
+		&templates2.ServiceAccount{Force: true},
 	}
 
 	return scaffold.Execute(templates...)

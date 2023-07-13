@@ -18,6 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
+	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
 
 	"github.com/spf13/afero"
 
@@ -123,7 +124,7 @@ func (s *initScaffolder) Scaffold() error {
 	//}
 
 	return scaffold.Execute(
-		&templates.Main{},
+		&templates.Main{IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
 		&templates.GoMod{
 			ControllerRuntimeVersion:   ControllerRuntimeVersion,
 			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
@@ -137,7 +138,7 @@ func (s *initScaffolder) Scaffold() error {
 			ControllerRuntimeVersion:   ControllerRuntimeVersion,
 			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
 		},
-		&templates.Dockerfile{},
+		&templates.Dockerfile{IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
 		&templates.DockerIgnore{},
 		&templates.Readme{},
 	)

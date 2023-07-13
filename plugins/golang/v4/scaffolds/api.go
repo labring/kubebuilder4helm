@@ -19,6 +19,7 @@ package scaffolds
 import (
 	"errors"
 	"fmt"
+	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
 
 	"github.com/spf13/afero"
 
@@ -101,8 +102,8 @@ func (s *apiScaffolder) Scaffold() error {
 
 	if doController {
 		if err := scaffold.Execute(
-			&controllers.SuiteTest{Force: s.force},
-			&controllers.Controller{ControllerRuntimeVersion: ControllerRuntimeVersion, EndpointOperatorLibVersion: EndpointOperatorLibVersion, Force: s.force},
+			&controllers.SuiteTest{Force: s.force, IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
+			&controllers.Controller{ControllerRuntimeVersion: ControllerRuntimeVersion, EndpointOperatorLibVersion: EndpointOperatorLibVersion, Force: s.force, IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
 		); err != nil {
 			return fmt.Errorf("error scaffolding controller: %v", err)
 		}

@@ -18,7 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
-	templates2 "github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates"
+	templates2 "github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/chart/templates"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
