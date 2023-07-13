@@ -24,6 +24,7 @@ import (
 )
 
 const defaultMainPath = "cmd/main.go"
+const defaultLegacyLayoutMainPath = "main.go"
 
 var _ machinery.Template = &Main{}
 
@@ -33,12 +34,19 @@ type Main struct {
 	machinery.BoilerplateMixin
 	machinery.DomainMixin
 	machinery.RepositoryMixin
+	// IsLegacyLayout is added to ensure backwards compatibility and should
+	// be removed when we remove the go/v3 plugin
+	IsLegacyLayout bool
 }
 
 // SetTemplateDefaults implements file.Template
 func (f *Main) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join(defaultMainPath)
+		if f.IsLegacyLayout {
+			f.Path = filepath.Join(defaultLegacyLayoutMainPath)
+		} else {
+			f.Path = filepath.Join(defaultMainPath)
+		}
 	}
 
 	f.TemplateBody = fmt.Sprintf(mainTemplate,

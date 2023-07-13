@@ -17,6 +17,7 @@ limitations under the License.
 package templates
 
 import (
+	"fmt"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
@@ -25,6 +26,7 @@ var _ machinery.Template = &Dockerfile{}
 // Dockerfile scaffolds a file that defines the containerized build process
 type Dockerfile struct {
 	machinery.TemplateMixin
+	IsLegacyLayout bool
 }
 
 // SetTemplateDefaults implements file.Template
@@ -33,8 +35,17 @@ func (f *Dockerfile) SetTemplateDefaults() error {
 		f.Path = "Dockerfile"
 	}
 
-	f.TemplateBody = dockerfileTemplate
-
+	var fmtSource string
+	if f.IsLegacyLayout {
+		fmtSource = `COPY main.go main.go
+COPY api/ api/
+COPY controllers/ controllers/`
+	} else {
+		fmtSource = `COPY cmd/main.go cmd/main.go
+COPY api/ api/
+COPY internal/controller/ internal/controller/`
+	}
+	f.TemplateBody = fmt.Sprintf(dockerfileTemplate, fmtSource)
 	return nil
 }
 
