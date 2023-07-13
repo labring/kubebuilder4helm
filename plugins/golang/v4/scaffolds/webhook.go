@@ -21,9 +21,9 @@ import (
 
 	"github.com/spf13/afero"
 
-	"github.com/labring/kubebuilder-helm/plugins/golang/v4/scaffolds/internal/templates"
-	"github.com/labring/kubebuilder-helm/plugins/golang/v4/scaffolds/internal/templates/api"
-	"github.com/labring/kubebuilder-helm/plugins/golang/v4/scaffolds/internal/templates/hack"
+	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds/internal/templates"
+	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds/internal/templates/api"
+	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds/internal/templates/hack"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"

@@ -18,9 +18,9 @@ package scaffolds
 
 import (
 	"fmt"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/certmanager"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/kdefault"
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/webhook"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/certmanager"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/kdefault"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/charts/templates/webhook"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
@@ -69,11 +69,9 @@ func (s *webhookScaffolder) Scaffold() error {
 	if err := scaffold.Execute(
 		&kdefault.WebhookCAInjectionPatch{},
 		&kdefault.ManagerWebhookPatch{},
-		&webhook.Kustomization{Force: s.force},
 		&webhook.KustomizeConfig{},
 		&webhook.Service{},
 		&certmanager.Certificate{},
-		&certmanager.Kustomization{},
 		&certmanager.KustomizeConfig{},
 	); err != nil {
 		return fmt.Errorf("error scaffolding kustomize webhook manifests: %v", err)

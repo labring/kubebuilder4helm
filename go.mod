@@ -1,4 +1,4 @@
-module github.com/labring/kubebuilder-helm
+module github.com/labring/kubebuilder4helm
 
 go 1.20
 

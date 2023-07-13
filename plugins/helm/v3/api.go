@@ -17,7 +17,7 @@ limitations under the License.
 package v3
 
 import (
-	"github.com/labring/kubebuilder-helm/plugins/helm/v3/scaffolds"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
 )

@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	mydomainv1 "github.com/labring/kubebuilder-helm/api/v1"
+	mydomainv1 "github.com/labring/kubebuilder4helm/api/v1"
 )
 
 // TestReconciler reconciles a Test object

@@ -17,9 +17,9 @@ limitations under the License.
 package main
 
 import (
-	"github.com/labring/kubebuilder-helm/plugins"
-	golangv4 "github.com/labring/kubebuilder-helm/plugins/golang/v4"
-	helmv1 "github.com/labring/kubebuilder-helm/plugins/helm/v3"
+	"github.com/labring/kubebuilder4helm/plugins"
+	golangv4 "github.com/labring/kubebuilder4helm/plugins/golang/v4"
+	helmv1 "github.com/labring/kubebuilder4helm/plugins/helm/v3"
 	"log"
 	"sigs.k8s.io/kubebuilder/v3/pkg/cli"
 	cfgv3 "sigs.k8s.io/kubebuilder/v3/pkg/config/v3"
@@ -32,7 +32,7 @@ func main() {
 		plugin.WithPlugins(helmv1.Plugin{}, golangv4.Plugin{}),
 	)
 	c, err := cli.New(
-		cli.WithCommandName("kubebuilder-helm"),
+		cli.WithCommandName("kubebuilder4helm"),
 		cli.WithVersion(versionString()),
 		cli.WithExtraCommands(), // 如果有额外的命令
 		cli.WithPlugins(

@@ -24,8 +24,8 @@ import (
 
 	"github.com/spf13/pflag"
 
-	goPlugin "github.com/labring/kubebuilder-helm/plugins/golang"
-	"github.com/labring/kubebuilder-helm/plugins/golang/v4/scaffolds"
+	goPlugin "github.com/labring/kubebuilder4helm/plugins/golang"
+	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"

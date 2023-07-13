@@ -17,7 +17,7 @@ limitations under the License.
 package v4
 
 import (
-	"github.com/labring/kubebuilder-helm/plugins"
+	"github.com/labring/kubebuilder4helm/plugins"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	cfgv3 "sigs.k8s.io/kubebuilder/v3/pkg/config/v3"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/stage"

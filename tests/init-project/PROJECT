@@ -6,7 +6,7 @@ domain: my.domain
 layout:
 - go.kubebuilder.io/v3
 projectName: init-project
-repo: github.com/labring/kubebuilder-helm
+repo: github.com/labring/kubebuilder4helm
 resources:
 - api:
     crdVersion: v1
@@ -14,7 +14,7 @@ resources:
   controller: true
   domain: my.domain
   kind: Test
-  path: github.com/labring/kubebuilder-helm/api/v1
+  path: github.com/labring/kubebuilder4helm/api/v1
   version: v1
   webhooks:
     conversion: true

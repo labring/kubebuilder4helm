@@ -16,7 +16,7 @@ limitations under the License.
 
 package golang
 
-import "github.com/labring/kubebuilder-helm/plugins"
+import "github.com/labring/kubebuilder4helm/plugins"
 
 // DefaultNameQualifier is the suffix appended to all kubebuilder plugin names for Golang operators.
 const DefaultNameQualifier = "go." + plugins.DefaultNameQualifier
