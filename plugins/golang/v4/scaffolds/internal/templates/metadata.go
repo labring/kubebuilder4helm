@@ -39,6 +39,5 @@ func (f *Metadata) SetTemplateDefaults() error {
 	return nil
 }
 
-const metadataTemplate = `
-isLegacyLayout: {{ .IsLegacyLayout }}
+const metadataTemplate = `isLegacyLayout: {{ .IsLegacyLayout }}
 `
