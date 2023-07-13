@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	pluginsdk "github.com/labring/kubebuilder4helm/plugin"
 	"os"
 
 	"github.com/spf13/pflag"
@@ -40,6 +41,7 @@ const (
 
 // DefaultMainPath is default file path of main.go
 const DefaultMainPath = "cmd/main.go"
+const DefaultLegacyLayoutMainPath = "main.go"
 
 var _ plugin.CreateAPISubcommand = &createAPISubcommand{}
 
@@ -59,6 +61,9 @@ type createAPISubcommand struct {
 
 	// runMake indicates whether to run make or not after scaffolding APIs
 	runMake bool
+
+	// extension points for plugins to customize the scaffolding behavior
+	extConfig pluginsdk.ConfigExtension
 }
 
 func (p *createAPISubcommand) UpdateMetadata(cliMeta plugin.CLIMetadata, subcmdMeta *plugin.SubcommandMetadata) {
@@ -123,7 +128,7 @@ func (p *createAPISubcommand) InjectConfig(c config.Config) error {
 
 func (p *createAPISubcommand) InjectResource(res *resource.Resource) error {
 	p.resource = res
-
+	p.extConfig = pluginsdk.GetConfigExtension()
 	// TODO: re-evaluate whether y/n input still makes sense. We should probably always
 	//       scaffold the resource and controller.
 	// Ask for API and Controller if not specified
@@ -137,7 +142,7 @@ func (p *createAPISubcommand) InjectResource(res *resource.Resource) error {
 		p.options.DoController = util.YesNo(reader)
 	}
 
-	p.options.UpdateResource(p.resource, p.config)
+	p.options.UpdateResource(p.resource, p.config, p.extConfig)
 
 	if err := p.resource.Validate(); err != nil {
 		return err
@@ -161,16 +166,20 @@ func (p *createAPISubcommand) InjectResource(res *resource.Resource) error {
 }
 
 func (p *createAPISubcommand) PreScaffold(machinery.Filesystem) error {
+	maingo := DefaultMainPath
 	// check if main.go is present in the root directory
-	if _, err := os.Stat(DefaultMainPath); os.IsNotExist(err) {
-		return fmt.Errorf("%s file should present in the root directory", DefaultMainPath)
+	if p.extConfig.IsLegacyLayout {
+		maingo = DefaultLegacyLayoutMainPath
+	}
+	if _, err := os.Stat(maingo); os.IsNotExist(err) {
+		return fmt.Errorf("%s file should present in the root directory", maingo)
 	}
 
 	return nil
 }
 
 func (p *createAPISubcommand) Scaffold(fs machinery.Filesystem) error {
-	scaffolder := scaffolds.NewAPIScaffolder(p.config, *p.resource, p.force)
+	scaffolder := scaffolds.NewAPIScaffolder(p.config, *p.resource, p.force, p.extConfig)
 	scaffolder.InjectFS(fs)
 	return scaffolder.Scaffold()
 }

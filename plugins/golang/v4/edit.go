@@ -32,7 +32,8 @@ var _ plugin.EditSubcommand = &editSubcommand{}
 type editSubcommand struct {
 	config config.Config
 
-	multigroup bool
+	multigroup     bool
+	isLegacyLayout bool
 }
 
 func (p *editSubcommand) UpdateMetadata(cliMeta plugin.CLIMetadata, subcmdMeta *plugin.SubcommandMetadata) {
@@ -45,11 +46,18 @@ Features supported:
 
   # Disable the multigroup layout
   %[1]s edit --multigroup=false
+
+  # Enable the legacy layout
+  %[1]s edit --legacy
+
+  # Disable the legacy layout
+  %[1]s edit --legacy=false
 `, cliMeta.CommandName)
 }
 
 func (p *editSubcommand) BindFlags(fs *pflag.FlagSet) {
 	fs.BoolVar(&p.multigroup, "multigroup", false, "enable or disable multigroup layout")
+	fs.BoolVar(&p.isLegacyLayout, "legacy", false, "enable or disable legacy layout")
 }
 
 func (p *editSubcommand) InjectConfig(c config.Config) error {
@@ -59,7 +67,7 @@ func (p *editSubcommand) InjectConfig(c config.Config) error {
 }
 
 func (p *editSubcommand) Scaffold(fs machinery.Filesystem) error {
-	scaffolder := scaffolds.NewEditScaffolder(p.config, p.multigroup)
+	scaffolder := scaffolds.NewEditScaffolder(p.config, p.multigroup, p.isLegacyLayout)
 	scaffolder.InjectFS(fs)
 	return scaffolder.Scaffold()
 }

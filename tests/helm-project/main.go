@@ -31,9 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	shipv1beta1 "github.com/labring/kubebuilder4helm/api/v1beta1"
-	"github.com/labring/kubebuilder4helm/internal/controller"
-
 	//+kubebuilder:scaffold:imports
 	utilcontroller "github.com/labring/operator-sdk/controller"
 )
@@ -46,7 +43,6 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(shipv1beta1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -97,21 +93,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.SettingReconciler{
-		MaxConcurrentReconciles: concurrent,
-		RateLimiter:             utilcontroller.GetRateLimiter(rateLimiterOptions),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Setting")
-		os.Exit(1)
-	}
-	if os.Getenv("DISABLE_WEBHOOKS") != "true" {
-		if err = (&shipv1beta1.Setting{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Setting")
-			os.Exit(1)
-		} else {
-			setupLog.Info("webhook disable", "webhook", "Setting")
-		}
-	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

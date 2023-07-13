@@ -17,6 +17,7 @@ limitations under the License.
 package scaffolds
 
 import (
+	"github.com/labring/kubebuilder4helm/plugin"
 	"github.com/spf13/afero"
 
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
@@ -27,18 +28,19 @@ import (
 var _ plugins.Scaffolder = &editScaffolder{}
 
 type editScaffolder struct {
-	config     config.Config
-	multigroup bool
-
+	config         config.Config
+	multigroup     bool
+	isLegacyLayout bool
 	// fs is the filesystem that will be used by the scaffolder
 	fs machinery.Filesystem
 }
 
 // NewEditScaffolder returns a new Scaffolder for configuration edit operations
-func NewEditScaffolder(config config.Config, multigroup bool) plugins.Scaffolder {
+func NewEditScaffolder(config config.Config, multigroup, isLegacyLayout bool) plugins.Scaffolder {
 	return &editScaffolder{
-		config:     config,
-		multigroup: multigroup,
+		config:         config,
+		multigroup:     multigroup,
+		isLegacyLayout: isLegacyLayout,
 	}
 }
 
@@ -55,17 +57,17 @@ func (s *editScaffolder) Scaffold() error {
 		return err
 	}
 	str := string(bs)
-
 	// Ignore the error encountered, if the file is already in desired format.
 	if err != nil && s.multigroup != s.config.IsMultiGroup() {
 		return err
 	}
-
 	if s.multigroup {
 		_ = s.config.SetMultiGroup()
 	} else {
 		_ = s.config.ClearMultiGroup()
 	}
+
+	_ = plugin.SetConfigExtension(&plugin.ConfigExtension{IsLegacyLayout: s.isLegacyLayout})
 
 	// Check if the str is not empty, because when the file is already in desired format it will return empty string
 	// because there is nothing to replace.

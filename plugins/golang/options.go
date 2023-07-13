@@ -17,12 +17,12 @@ limitations under the License.
 package golang
 
 import (
+	"github.com/labring/kubebuilder4helm/plugin"
 	"path"
 
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	cfgv2 "sigs.k8s.io/kubebuilder/v3/pkg/config/v2"
 	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
 )
 
 var (
@@ -75,14 +75,14 @@ type Options struct {
 }
 
 // UpdateResource updates the provided resource with the options
-func (opts Options) UpdateResource(res *resource.Resource, c config.Config) {
+func (opts Options) UpdateResource(res *resource.Resource, c config.Config, e plugin.ConfigExtension) {
 	if opts.Plural != "" {
 		res.Plural = opts.Plural
 	}
 
 	if opts.DoAPI {
 		//nolint:staticcheck
-		if plugin.IsLegacyLayout(c) {
+		if e.IsLegacyLayout {
 			res.Path = resource.APIPackagePathLegacy(c.GetRepository(), res.Group, res.Version, c.IsMultiGroup())
 		} else {
 			res.Path = resource.APIPackagePath(c.GetRepository(), res.Group, res.Version, c.IsMultiGroup())
@@ -103,7 +103,7 @@ func (opts Options) UpdateResource(res *resource.Resource, c config.Config) {
 		// IsLegacyLayout is added to ensure backwards compatibility and should
 		// be removed when we remove the go/v3 plugin
 		//nolint:staticcheck
-		if plugin.IsLegacyLayout(c) {
+		if e.IsLegacyLayout {
 			res.Path = resource.APIPackagePathLegacy(c.GetRepository(), res.Group, res.Version, c.IsMultiGroup())
 		} else {
 			res.Path = resource.APIPackagePath(c.GetRepository(), res.Group, res.Version, c.IsMultiGroup())

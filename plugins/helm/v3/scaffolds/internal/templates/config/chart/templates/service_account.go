@@ -34,7 +34,7 @@ type ServiceAccount struct {
 // SetTemplateDefaults implements file.Template
 func (f *ServiceAccount) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "rbac", "service_account.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "service_account.yaml")
 	}
 
 	f.TemplateBody = serviceAccountTemplate

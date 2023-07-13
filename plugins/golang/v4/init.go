@@ -56,6 +56,7 @@ type initSubcommand struct {
 	// flags
 	fetchDeps          bool
 	skipGoVersionCheck bool
+	isLegacyLayout     bool
 }
 
 func (p *initSubcommand) UpdateMetadata(cliMeta plugin.CLIMetadata, subcmdMeta *plugin.SubcommandMetadata) {
@@ -67,6 +68,7 @@ func (p *initSubcommand) UpdateMetadata(cliMeta plugin.CLIMetadata, subcmdMeta *
   - a "Makefile" with several useful make targets for the project
   - several YAML files for project deployment under the "config" directory
   - a "cmd/main.go" file that creates the manager that will run the project controllers
+  - a "METADATA" file that stores metadata about the project
 `
 	subcmdMeta.Examples = fmt.Sprintf(`  # Initialize a new project with your domain and name in copyright
   %[1]s init --plugins go/v4 --domain example.org --owner "Your name"
@@ -91,6 +93,9 @@ func (p *initSubcommand) BindFlags(fs *pflag.FlagSet) {
 	// project args
 	fs.StringVar(&p.repo, "repo", "", "name to use for go module (e.g., github.com/user/repo), "+
 		"defaults to the go package of the current working directory.")
+
+	// legacy layout arg
+	fs.BoolVar(&p.isLegacyLayout, "legacy", false, "if specified, use the legacy project layout")
 }
 
 func (p *initSubcommand) InjectConfig(c config.Config) error {
@@ -121,7 +126,7 @@ func (p *initSubcommand) PreScaffold(machinery.Filesystem) error {
 }
 
 func (p *initSubcommand) Scaffold(fs machinery.Filesystem) error {
-	scaffolder := scaffolds.NewInitScaffolder(p.config, p.license, p.owner)
+	scaffolder := scaffolds.NewInitScaffolder(p.config, p.license, p.owner, p.isLegacyLayout)
 	scaffolder.InjectFS(fs)
 	err := scaffolder.Scaffold()
 	if err != nil {

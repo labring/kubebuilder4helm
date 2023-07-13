@@ -1,5 +1,5 @@
 /*
-Copyright 2023.
+Copyright 2022 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package templates
 
 import (
-	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-// log is for logging in this package.
-var settinglog = logf.Log.WithName("setting-resource")
+var _ machinery.Template = &Metadata{}
 
-func (r *Setting) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
-		Complete()
+// Metadata scaffolds a file that defines which files should be ignored by git
+type Metadata struct {
+	machinery.TemplateMixin
+	IsLegacyLayout bool
 }
 
-// TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// SetTemplateDefaults implements file.Template
+func (f *Metadata) SetTemplateDefaults() error {
+	if f.Path == "" {
+		f.Path = "METADATA"
+	}
+
+	f.TemplateBody = metadataTemplate
+
+	return nil
+}
+
+const metadataTemplate = `
+isLegacyLayout: {{ .IsLegacyLayout }}
+`

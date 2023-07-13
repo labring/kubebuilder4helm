@@ -139,7 +139,7 @@ const controllerSuiteTestTemplate = `{{ .Boilerplate }}
 {{if and .MultiGroup .Resource.Group }}
 package {{ .Resource.PackageName }}
 {{else}}
-package controller
+package {{ .PackageName }}
 {{end}}
 
 import (

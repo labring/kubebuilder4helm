@@ -19,6 +19,7 @@ package templates
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
@@ -68,11 +69,18 @@ type MainUpdater struct { //nolint:maligned
 
 	// Flags to indicate which parts need to be included when updating the file
 	WireResource, WireController, WireWebhook bool
+	// IsLegacyLayout is added to ensure backwards compatibility and should
+	// be removed when we remove the go/v3 plugin
+	IsLegacyLayout bool
 }
 
 // GetPath implements file.Builder
-func (*MainUpdater) GetPath() string {
-	return defaultMainPath
+func (f *MainUpdater) GetPath() string {
+	if f.IsLegacyLayout {
+		return defaultLegacyLayoutMainPath
+	} else {
+		return defaultMainPath
+	}
 }
 
 // GetIfExistsAction implements file.Builder
@@ -89,9 +97,9 @@ const (
 // GetMarkers implements file.Inserter
 func (f *MainUpdater) GetMarkers() []machinery.Marker {
 	return []machinery.Marker{
-		machinery.NewMarkerFor(defaultMainPath, importMarker),
-		machinery.NewMarkerFor(defaultMainPath, addSchemeMarker),
-		machinery.NewMarkerFor(defaultMainPath, setupMarker),
+		machinery.NewMarkerFor(f.GetPath(), importMarker),
+		machinery.NewMarkerFor(f.GetPath(), addSchemeMarker),
+		machinery.NewMarkerFor(f.GetPath(), setupMarker),
 	}
 }
 
@@ -148,10 +156,19 @@ func (f *MainUpdater) GetCodeFragments() machinery.CodeFragmentsMap {
 
 	if f.WireController {
 		if !f.MultiGroup || f.Resource.Group == "" {
-			imports = append(imports, fmt.Sprintf(controllerImportCodeFragment, f.Repo))
+			if f.IsLegacyLayout {
+				imports = append(imports, fmt.Sprintf(strings.ReplaceAll(controllerImportCodeFragment, "internal/controller", "controllers"), f.Repo))
+			} else {
+				imports = append(imports, fmt.Sprintf(controllerImportCodeFragment, f.Repo))
+			}
 		} else {
-			imports = append(imports, fmt.Sprintf(multiGroupControllerImportCodeFragment,
-				f.Resource.PackageName(), f.Repo, f.Resource.Group))
+			if f.IsLegacyLayout {
+				imports = append(imports, fmt.Sprintf(strings.ReplaceAll(multiGroupControllerImportCodeFragment, "internal/controller", "controllers"),
+					f.Resource.PackageName(), f.Repo, f.Resource.Group))
+			} else {
+				imports = append(imports, fmt.Sprintf(multiGroupControllerImportCodeFragment,
+					f.Resource.PackageName(), f.Repo, f.Resource.Group))
+			}
 		}
 	}
 
@@ -179,13 +196,13 @@ func (f *MainUpdater) GetCodeFragments() machinery.CodeFragmentsMap {
 
 	// Only store code fragments in the map if the slices are non-empty
 	if len(imports) != 0 {
-		fragments[machinery.NewMarkerFor(defaultMainPath, importMarker)] = imports
+		fragments[machinery.NewMarkerFor(f.GetPath(), importMarker)] = imports
 	}
 	if len(addScheme) != 0 {
-		fragments[machinery.NewMarkerFor(defaultMainPath, addSchemeMarker)] = addScheme
+		fragments[machinery.NewMarkerFor(f.GetPath(), addSchemeMarker)] = addScheme
 	}
 	if len(setup) != 0 {
-		fragments[machinery.NewMarkerFor(defaultMainPath, setupMarker)] = setup
+		fragments[machinery.NewMarkerFor(f.GetPath(), setupMarker)] = setup
 	}
 
 	return fragments
