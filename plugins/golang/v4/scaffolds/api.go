@@ -19,8 +19,7 @@ package scaffolds
 import (
 	"errors"
 	"fmt"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
-
+	pluginsdk "github.com/labring/kubebuilder4helm/plugin"
 	"github.com/spf13/afero"
 
 	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds/internal/templates"
@@ -46,14 +45,18 @@ type apiScaffolder struct {
 
 	// force indicates whether to scaffold controller files even if it exists or not
 	force bool
+
+	// extension points for plugins to customize the scaffolding behavior
+	extConfig pluginsdk.ConfigExtension
 }
 
 // NewAPIScaffolder returns a new Scaffolder for API/controller creation operations
-func NewAPIScaffolder(config config.Config, res resource.Resource, force bool) plugins.Scaffolder {
+func NewAPIScaffolder(config config.Config, res resource.Resource, force bool, extConfig pluginsdk.ConfigExtension) plugins.Scaffolder {
 	return &apiScaffolder{
-		config:   config,
-		resource: res,
-		force:    force,
+		config:    config,
+		resource:  res,
+		force:     force,
+		extConfig: extConfig,
 	}
 }
 
@@ -102,15 +105,15 @@ func (s *apiScaffolder) Scaffold() error {
 
 	if doController {
 		if err := scaffold.Execute(
-			&controllers.SuiteTest{Force: s.force, IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
-			&controllers.Controller{ControllerRuntimeVersion: ControllerRuntimeVersion, EndpointOperatorLibVersion: EndpointOperatorLibVersion, Force: s.force, IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
+			&controllers.SuiteTest{Force: s.force, IsLegacyLayout: s.extConfig.IsLegacyLayout},
+			&controllers.Controller{ControllerRuntimeVersion: ControllerRuntimeVersion, EndpointOperatorLibVersion: EndpointOperatorLibVersion, Force: s.force, IsLegacyLayout: s.extConfig.IsLegacyLayout},
 		); err != nil {
 			return fmt.Errorf("error scaffolding controller: %v", err)
 		}
 	}
 
 	if err := scaffold.Execute(
-		&templates.MainUpdater{WireResource: doAPI, WireController: doController},
+		&templates.MainUpdater{WireResource: doAPI, WireController: doController, IsLegacyLayout: s.extConfig.IsLegacyLayout},
 	); err != nil {
 		return fmt.Errorf("error updating cmd/main.go: %v", err)
 	}

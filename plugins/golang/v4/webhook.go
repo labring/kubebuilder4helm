@@ -18,6 +18,7 @@ package v4
 
 import (
 	"fmt"
+	pluginsdk "github.com/labring/kubebuilder4helm/plugin"
 
 	"github.com/spf13/pflag"
 
@@ -46,6 +47,9 @@ type createWebhookSubcommand struct {
 
 	// force indicates that the resource should be created even if it already exists
 	force bool
+
+	// extension points for plugins to customize the scaffolding behavior
+	extConfig pluginsdk.ConfigExtension
 }
 
 func (p *createWebhookSubcommand) UpdateMetadata(cliMeta plugin.CLIMetadata, subcmdMeta *plugin.SubcommandMetadata) {
@@ -89,8 +93,8 @@ func (p *createWebhookSubcommand) InjectConfig(c config.Config) error {
 
 func (p *createWebhookSubcommand) InjectResource(res *resource.Resource) error {
 	p.resource = res
-
-	p.options.UpdateResource(p.resource, p.config)
+	p.extConfig = pluginsdk.GetConfigExtension()
+	p.options.UpdateResource(p.resource, p.config, p.extConfig)
 
 	if err := p.resource.Validate(); err != nil {
 		return err
@@ -112,7 +116,7 @@ func (p *createWebhookSubcommand) InjectResource(res *resource.Resource) error {
 }
 
 func (p *createWebhookSubcommand) Scaffold(fs machinery.Filesystem) error {
-	scaffolder := scaffolds.NewWebhookScaffolder(p.config, *p.resource, p.force)
+	scaffolder := scaffolds.NewWebhookScaffolder(p.config, *p.resource, p.force, p.extConfig.IsLegacyLayout)
 	scaffolder.InjectFS(fs)
 	return scaffolder.Scaffold()
 }

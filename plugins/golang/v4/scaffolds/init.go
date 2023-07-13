@@ -18,8 +18,6 @@ package scaffolds
 
 import (
 	"fmt"
-	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"
-
 	"github.com/spf13/afero"
 
 	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds/internal/templates"
@@ -50,18 +48,19 @@ type initScaffolder struct {
 	boilerplatePath string
 	license         string
 	owner           string
-
+	isLegacyLayout  bool
 	// fs is the filesystem that will be used by the scaffolder
 	fs machinery.Filesystem
 }
 
 // NewInitScaffolder returns a new Scaffolder for project initialization operations
-func NewInitScaffolder(config config.Config, license, owner string) plugins.Scaffolder {
+func NewInitScaffolder(config config.Config, license, owner string, isLegacyLayout bool) plugins.Scaffolder {
 	return &initScaffolder{
 		config:          config,
 		boilerplatePath: hack.DefaultBoilerplatePath,
 		license:         license,
 		owner:           owner,
+		isLegacyLayout:  isLegacyLayout,
 	}
 }
 
@@ -124,7 +123,7 @@ func (s *initScaffolder) Scaffold() error {
 	//}
 
 	return scaffold.Execute(
-		&templates.Main{IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
+		&templates.Main{IsLegacyLayout: s.isLegacyLayout},
 		&templates.GoMod{
 			ControllerRuntimeVersion:   ControllerRuntimeVersion,
 			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
@@ -137,9 +136,11 @@ func (s *initScaffolder) Scaffold() error {
 			HelmVersion:                helmVersion,
 			ControllerRuntimeVersion:   ControllerRuntimeVersion,
 			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
+			IsLegacyLayout:             s.isLegacyLayout,
 		},
-		&templates.Dockerfile{IsLegacyLayout: plugin.IsLegacyLayout(s.config)},
+		&templates.Dockerfile{IsLegacyLayout: s.isLegacyLayout},
 		&templates.DockerIgnore{},
 		&templates.Readme{},
+		&templates.Metadata{IsLegacyLayout: s.isLegacyLayout},
 	)
 }

@@ -40,15 +40,17 @@ type webhookScaffolder struct {
 	fs machinery.Filesystem
 
 	// force indicates whether to scaffold controller files even if it exists or not
-	force bool
+	force          bool
+	isLegacyLayout bool
 }
 
 // NewWebhookScaffolder returns a new Scaffolder for v2 webhook creation operations
-func NewWebhookScaffolder(config config.Config, resource resource.Resource, force bool) plugins.Scaffolder {
+func NewWebhookScaffolder(config config.Config, resource resource.Resource, force bool, isLegacyLayout bool) plugins.Scaffolder {
 	return &webhookScaffolder{
-		config:   config,
-		resource: resource,
-		force:    force,
+		config:         config,
+		resource:       resource,
+		force:          force,
+		isLegacyLayout: isLegacyLayout,
 	}
 }
 
@@ -85,7 +87,7 @@ func (s *webhookScaffolder) Scaffold() error {
 
 	if err := scaffold.Execute(
 		&api.Webhook{Force: s.force},
-		&templates.MainUpdater{WireWebhook: true},
+		&templates.MainUpdater{WireWebhook: true, IsLegacyLayout: s.isLegacyLayout},
 	); err != nil {
 		return err
 	}

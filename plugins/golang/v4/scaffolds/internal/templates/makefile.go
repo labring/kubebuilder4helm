@@ -40,6 +40,9 @@ type Makefile struct {
 	ControllerRuntimeVersion string
 	// EndpointOperatorLibVersion version to be used to download the envtest setup script
 	EndpointOperatorLibVersion string
+	//IsLegacyLayout indicates if the project is using the legacy layout
+	IsLegacyLayout bool
+	MainGO         string
 }
 
 // SetTemplateDefaults implements file.Template
@@ -54,6 +57,12 @@ func (f *Makefile) SetTemplateDefaults() error {
 
 	if f.Image == "" {
 		f.Image = "controller:latest"
+	}
+
+	if f.IsLegacyLayout {
+		f.MainGO = defaultLegacyLayoutMainPath
+	} else {
+		f.MainGO = defaultMainPath
 	}
 
 	return nil
@@ -134,11 +143,11 @@ test: manifests generate fmt vet envtest ## Run tests.
 
 .PHONY: build
 build: manifests generate fmt vet ## Build manager binary.
-	go build -o bin/manager cmd/main.go
+	go build -o bin/manager {{ .MainGO}}
 
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
-	go run ./cmd/main.go
+	go run ./{{ .MainGO}}
 
 # If you wish built the manager image targeting other platforms you can use the --platform flag.
 # (i.e. docker build --platform linux/arm64 ). However, you must enable docker buildKit for it.
