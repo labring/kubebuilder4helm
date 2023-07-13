@@ -1,0 +1,16 @@
+{{- if .Values.prometheus -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helm-project.fullname" . }}-metrics-service
+  labels:
+    {{- include "helm-project.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: 8443
+      targetPort: https
+      protocol: TCP
+      name: https
+  selector:
+    {{- include "helm-project.selectorLabels" . | nindent 4 }}
+{{- end }}

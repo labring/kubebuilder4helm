@@ -14,35 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package charts
+package templates
 
 import (
 	"path/filepath"
-	"strings"
 
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-var _ machinery.Template = &Values{}
+var _ machinery.Template = &WebhookService{}
 
-// Values scaffolds a file that defines the kustomization scheme for the webhook folder
-type Values struct {
+// WebhookService scaffolds a file that defines the webhook service
+type WebhookService struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
-	machinery.RepositoryMixin
-	Force            bool
-	GithubDockerRepo string
+	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
-func (f *Values) SetTemplateDefaults() error {
+func (f *WebhookService) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "values.yaml")
+		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "webhook-service.yaml")
 	}
-
-	f.GithubDockerRepo = strings.Join(strings.Split(f.Repo, "/")[:2], "/")
-
-	f.TemplateBody = valuesTemplate
+	f.SetDelim("[[", "]]")
+	f.TemplateBody = webhookServiceTemplate
 
 	if f.Force {
 		f.IfExistsAction = machinery.OverwriteFile
@@ -50,22 +45,23 @@ func (f *Values) SetTemplateDefaults() error {
 		// If file exists (ex. because a webhook was already created), skip creation.
 		f.IfExistsAction = machinery.SkipFile
 	}
-
 	return nil
 }
 
-const valuesTemplate = `# Default values for {{ .ProjectName }}.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-replicaCount: 1
-nameOverride: ""
-fullnameOverride: ""
-image:
-  repository: {{ .GithubDockerRepo }}
-  pullPolicy: IfNotPresent
-  image: {{ .ProjectName }}
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
-
-prometheus: false
+const webhookServiceTemplate = `{{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-service
+  labels:
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: 443
+      targetPort: 9443
+      protocol: TCP
+      name: webhook
+  selector:
+    {{- include "[[ .ProjectName ]].selectorLabels" . | nindent 4 }}
+{{- end }}
 `
