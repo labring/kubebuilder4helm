@@ -22,37 +22,37 @@ import (
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-var _ machinery.Template = &MetricsService{}
+var _ machinery.Template = &MonitorService{}
 
-// MetricsService scaffolds a file that defines the Metrics service
-type MetricsService struct {
+// MonitorService scaffolds a file that defines the monitor service
+type MonitorService struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
 	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
-func (f *MetricsService) SetTemplateDefaults() error {
+func (f *MonitorService) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "metrics-service.yaml")
+		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "monitor-service.yaml")
 	}
 	f.SetDelim("[[", "]]")
-	f.TemplateBody = metricsServiceTemplate
+	f.TemplateBody = monitorServiceTemplate
 
 	if f.Force {
 		f.IfExistsAction = machinery.OverwriteFile
 	} else {
-		// If file exists (ex. because a Metrics was already created), skip creation.
+		// If file exists (ex. because a monitor was already created), skip creation.
 		f.IfExistsAction = machinery.SkipFile
 	}
 	return nil
 }
 
-const metricsServiceTemplate = `{{- if .Values.prometheus -}}
+const monitorServiceTemplate = `{{- if .Values.prometheus -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "[[ .ProjectName ]].fullname" . }}-metrics-service
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-monitor-service
   labels:
     {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
 spec:

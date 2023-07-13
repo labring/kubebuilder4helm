@@ -68,12 +68,11 @@ func (s *webhookScaffolder) Scaffold() error {
 		&templates2.Helpers{Force: true, WebhookEnabled: true},
 		&templates2.CertManagerCheck{Force: s.force},
 		&templates2.WebhookService{Force: s.force},
-		&templates2.MetricsService{Force: s.force},
+		&templates2.Certificate{Force: s.force},
 		//&kdefault.WebhookCAInjectionPatch{},
 		//&kdefault.ManagerWebhookPatch{},
 		//&webhook.KustomizeConfig{},
 
-		//&certmanager.Certificate{},
 		//&certmanager.KustomizeConfig{},
 	); err != nil {
 		return fmt.Errorf("error scaffolding kustomize webhook manifests: %v", err)

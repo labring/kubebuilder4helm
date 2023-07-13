@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package prometheus
+package templates
 
 import (
 	"path/filepath"
@@ -28,34 +28,35 @@ var _ machinery.Template = &Monitor{}
 type Monitor struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
+	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
 func (f *Monitor) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", "prometheus", "monitor.yaml")
+		f.Path = filepath.Join("config", "charts", f.ProjectName, "templates", "monitor.yaml")
 	}
+	f.SetDelim("[[", "]]")
 
-	f.TemplateBody = serviceMonitorTemplate
+	f.TemplateBody = monitorTemplate
 
+	if f.Force {
+		f.IfExistsAction = machinery.OverwriteFile
+	} else {
+		// If file exists (ex. because a monitor was already created), skip creation.
+		f.IfExistsAction = machinery.SkipFile
+	}
 	return nil
 }
 
-const serviceMonitorTemplate = `
+const monitorTemplate = `{{- if .Values.prometheus -}}
 # Prometheus Monitor Service (Metrics)
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: {{ include "[[ .ProjectName ]].fullname" . }}-metrics
   labels:
-    control-plane: controller-manager
-    app.kubernetes.io/name: servicemonitor
-    app.kubernetes.io/instance: controller-manager-metrics-monitor
-    app.kubernetes.io/component: metrics
-    app.kubernetes.io/created-by: {{ .ProjectName }}
-    app.kubernetes.io/part-of: {{ .ProjectName }}
-    app.kubernetes.io/managed-by: kustomize
-  name: controller-manager-metrics-monitor
-  namespace: system
+    {{- include "[[ .ProjectName ]].labels" . | nindent 4 }}
 spec:
   endpoints:
     - path: /metrics
@@ -66,5 +67,6 @@ spec:
         insecureSkipVerify: true
   selector:
     matchLabels:
-      control-plane: controller-manager
+      {{- include "[[ .ProjectName ]].selectorLabels" . | nindent 4 }}
+{{- end }}
 `

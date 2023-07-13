@@ -136,22 +136,6 @@ func main() {
 			setupLog.Info("webhook disable", "webhook", "Setting")
 		}
 	}
-	if os.Getenv("DISABLE_WEBHOOKS") != "true" {
-		if err = (&shipv1beta1.Setting{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Setting")
-			os.Exit(1)
-		} else {
-			setupLog.Info("webhook disable", "webhook", "Setting")
-		}
-	}
-	if os.Getenv("DISABLE_WEBHOOKS") != "true" {
-		if err = (&shipv1beta1.Setting{}).SetupWebhookWithManager(mgr); err != nil {
-			setupLog.Error(err, "unable to create webhook", "webhook", "Setting")
-			os.Exit(1)
-		} else {
-			setupLog.Info("webhook disable", "webhook", "Setting")
-		}
-	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
