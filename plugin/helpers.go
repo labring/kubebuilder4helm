@@ -52,6 +52,7 @@ func SetConfigExtension(config *ConfigExtension) error {
 	if err != nil {
 		return err
 	}
-	_ = afero.WriteFile(afero.NewMemMapFs(), filename, bs, 0644)
+	fs := machinery.Filesystem{FS: afero.NewOsFs()}
+	_ = afero.WriteFile(fs.FS, filename, bs, 0644)
 	return nil
 }
