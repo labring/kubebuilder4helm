@@ -34,7 +34,7 @@ const (
 	// ControllerToolsVersion is the kubernetes-sigs/controller-tools version to be used in the project
 	ControllerToolsVersion = "v0.12.0"
 	// EndpointOperatorLibVersion is the labring/operator-sdk version to be used in the project
-	EndpointOperatorLibVersion = "v1.0.0"
+	EndpointOperatorLibVersion = "v1.0.1"
 
 	imageName = "controller:latest"
 )
