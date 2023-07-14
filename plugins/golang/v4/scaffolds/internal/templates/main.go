@@ -112,18 +112,12 @@ const (
 `
 	addschemeCodeFragment = `utilruntime.Must(%s.AddToScheme(scheme))
 `
-	reconcilerSetupCodeFragment = `if err = (&controller.%sReconciler{
-		MaxConcurrentReconciles: concurrent,
-		RateLimiter: utilcontroller.GetRateLimiter(rateLimiterOptions),
-	}).SetupWithManager(mgr); err != nil {
+	reconcilerSetupCodeFragment = `if err = (&controller.%sReconciler{}).SetupWithManager(mgr, rateLimiterOptions); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "%s")
 		os.Exit(1)
 	}
 `
-	multiGroupReconcilerSetupCodeFragment = `if err = (&%scontroller.%sReconciler{
-		MaxConcurrentReconciles: concurrent,
-		RateLimiter: utilcontroller.GetRateLimiter(rateLimiterOptions),
-	}).SetupWithManager(mgr); err != nil {
+	multiGroupReconcilerSetupCodeFragment = `if err = (&%scontroller.%sReconciler{}).SetupWithManager(mgr, rateLimiterOptions); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "%s")
 		os.Exit(1)
 	}
@@ -246,7 +240,6 @@ func main() {
 		metricsAddr          string
 		enableLeaderElection bool
 		probeAddr            string
-		concurrent           int
 		rateLimiterOptions   utilcontroller.RateLimiterOptions
 	)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -254,7 +247,6 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. " +
 		"Enabling this will ensure there is only one active controller manager.")
-	flag.IntVar(&concurrent, "concurrent", 5, "The number of concurrent cluster reconciles.")
 	rateLimiterOptions.BindFlags(flag.CommandLine)
 	opts := zap.Options{
 		Development: true,

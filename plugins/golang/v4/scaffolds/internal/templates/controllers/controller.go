@@ -117,8 +117,6 @@ type {{ .Resource.Kind }}Reconciler struct {
 	// For more details
 	// - https://github.com/labring/operator-sdk/blob/{{ .EndpointOperatorLibVersion }}/controller/finalizer.go
 	finalizer *controller.Finalizer
-	MaxConcurrentReconciles int
-	RateLimiter             ratelimiter.RateLimiter
 }
 
 //+kubebuilder:rbac:groups={{ .Resource.QualifiedGroup }},resources={{ .Resource.Plural }},verbs=get;list;watch;create;update;patch;delete
@@ -202,7 +200,7 @@ func (r *{{ .Resource.Kind }}Reconciler) reconcile(ctx context.Context, obj clie
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *{{ .Resource.Kind }}Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *{{ .Resource.Kind }}Reconciler) SetupWithManager(mgr ctrl.Manager,opts controller.RateLimiterOptions) error {
 	if r.finalizer == nil {
 		r.finalizer = controller.NewFinalizer(r.Client, {{ lower .Resource.Kind }}Finalizer)
 	}
@@ -221,8 +219,8 @@ func (r *{{ .Resource.Kind }}Reconciler) SetupWithManager(mgr ctrl.Manager) erro
 		// For().
 		{{- end }}
 		WithOptions(kubecontroller.Options{
-			MaxConcurrentReconciles: r.MaxConcurrentReconciles,
-			RateLimiter:             r.RateLimiter,
+			MaxConcurrentReconciles: controller.GetConcurrent(opts),
+			RateLimiter:             controller.GetRateLimiter(opts),
 		}).
 		Complete(r)
 }
