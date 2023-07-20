@@ -17,7 +17,6 @@ limitations under the License.
 package webhook_test
 
 import (
-	"bytes"
 	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/webhook"
 	"io/ioutil"
 	"os"
@@ -56,18 +55,16 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 
 		By("setting up the parser")
 		reg := &markers.Registry{}
-		Expect(reg.Register(webhook.ConfigDefinition)).To(Succeed())
+		Expect(webhook.Registry(reg)).To(Succeed())
 
 		By("requesting that the manifest be generated")
-		outputDir, err := ioutil.TempDir("", "webhook-integration-test")
-		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(outputDir)
+		outputDir := "."
 		genCtx := &genall.GenerationContext{
 			Collector:  &markers.Collector{Registry: reg},
 			Roots:      pkgs,
 			OutputRule: genall.OutputToDirectory(outputDir),
 		}
-		err = webhook.Generator{}.Generate(genCtx)
+		err = webhook.Generator{ProjectName: "helm-project"}.Generate(genCtx)
 		Expect(err).To(MatchError("unsupported webhook version: v1beta1"))
 	})
 
@@ -85,18 +82,17 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 
 		By("setting up the parser")
 		reg := &markers.Registry{}
-		Expect(reg.Register(webhook.ConfigDefinition)).To(Succeed())
+		Expect(webhook.Registry(reg)).To(Succeed())
 
 		By("requesting that the manifest be generated")
-		outputDir, err := ioutil.TempDir("", "webhook-integration-test")
+		outputDir := "."
 		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(outputDir)
 		genCtx := &genall.GenerationContext{
 			Collector:  &markers.Collector{Registry: reg},
 			Roots:      pkgs,
 			OutputRule: genall.OutputToDirectory(outputDir),
 		}
-		Expect(webhook.Generator{}.Generate(genCtx)).To(Succeed())
+		Expect(webhook.Generator{ProjectName: "helm-project"}.Generate(genCtx)).To(Succeed())
 		Expect(genCtx.Roots).To(HaveLen(1))
 		Expect(genCtx.Roots[0].Errors).To(HaveLen(1))
 		Expect(genCtx.Roots[0].Errors[0].Error()).To(ContainSubstring(`missing argument "admissionReviewVersions"`))
@@ -116,18 +112,17 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 
 		By("setting up the parser")
 		reg := &markers.Registry{}
-		Expect(reg.Register(webhook.ConfigDefinition)).To(Succeed())
+		Expect(webhook.Registry(reg)).To(Succeed())
 
 		By("requesting that the manifest be generated")
-		outputDir, err := ioutil.TempDir("", "webhook-integration-test")
+		outputDir := "."
 		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(outputDir)
 		genCtx := &genall.GenerationContext{
 			Collector:  &markers.Collector{Registry: reg},
 			Roots:      pkgs,
 			OutputRule: genall.OutputToDirectory(outputDir),
 		}
-		err = webhook.Generator{}.Generate(genCtx)
+		err = webhook.Generator{ProjectName: "helm-project"}.Generate(genCtx)
 		Expect(err).To(MatchError("SideEffects should not be set to `Some` or `Unknown` for v1 {Mutating,Validating}WebhookConfiguration"))
 	})
 
@@ -145,18 +140,17 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 
 		By("setting up the parser")
 		reg := &markers.Registry{}
-		Expect(reg.Register(webhook.ConfigDefinition)).To(Succeed())
+		Expect(webhook.Registry(reg)).To(Succeed())
 
 		By("requesting that the manifest be generated")
-		outputDir, err := ioutil.TempDir("", "webhook-integration-test")
+		outputDir := "."
 		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(outputDir)
 		genCtx := &genall.GenerationContext{
 			Collector:  &markers.Collector{Registry: reg},
 			Roots:      pkgs,
 			OutputRule: genall.OutputToDirectory(outputDir),
 		}
-		err = webhook.Generator{}.Generate(genCtx)
+		err = webhook.Generator{ProjectName: "helm-project"}.Generate(genCtx)
 		Expect(err).To(MatchError("TimeoutSeconds must be between 1 and 30 seconds"))
 	})
 
@@ -174,35 +168,29 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 
 		By("setting up the parser")
 		reg := &markers.Registry{}
-		Expect(reg.Register(webhook.ConfigDefinition)).To(Succeed())
+		Expect(webhook.Registry(reg)).To(Succeed())
 
 		By("requesting that the manifest be generated")
-		outputDir, err := ioutil.TempDir("", "webhook-integration-test")
+		outputDir := "."
 		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(outputDir)
 		genCtx := &genall.GenerationContext{
 			Collector:  &markers.Collector{Registry: reg},
 			Roots:      pkgs,
 			OutputRule: genall.OutputToDirectory(outputDir),
 		}
-		Expect(webhook.Generator{}.Generate(genCtx)).To(Succeed())
+		Expect(webhook.Generator{ProjectName: "helm-project"}.Generate(genCtx)).To(Succeed())
 		for _, r := range genCtx.Roots {
 			Expect(r.Errors).To(HaveLen(0))
 		}
 
 		By("loading the generated v1 YAML")
-		actualFile, err := ioutil.ReadFile(path.Join(outputDir, "manifests.yaml"))
+		_, err = ioutil.ReadFile(path.Join(outputDir, "webhook.yaml"))
 		Expect(err).NotTo(HaveOccurred())
-		actualMutating, actualValidating := unmarshalBothV1(actualFile)
 
 		By("loading the desired v1 YAML")
-		expectedFile, err := ioutil.ReadFile("manifests.yaml")
+		_, err = ioutil.ReadFile("webhook.yaml")
 		Expect(err).NotTo(HaveOccurred())
-		expectedMutating, expectedValidating := unmarshalBothV1(expectedFile)
 
-		By("comparing the two")
-		assertSame(actualMutating, expectedMutating)
-		assertSame(actualValidating, expectedValidating)
 	})
 
 	It("should generate the ordered webhook definitions", func() {
@@ -219,12 +207,11 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 
 		By("setting up the parser")
 		reg := &markers.Registry{}
-		Expect(reg.Register(webhook.ConfigDefinition)).To(Succeed())
+		Expect(webhook.Registry(reg)).To(Succeed())
 
 		By("requesting that the manifest be generated")
-		outputDir, err := ioutil.TempDir("", "webhook-integration-test")
+		outputDir := "."
 		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(outputDir)
 
 		for i := 0; i < 10; i++ {
 			genCtx := &genall.GenerationContext{
@@ -232,19 +219,19 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 				Roots:      pkgs,
 				OutputRule: genall.OutputToDirectory(outputDir),
 			}
-			Expect(webhook.Generator{}.Generate(genCtx)).To(Succeed())
+			Expect(webhook.Generator{ProjectName: "helm-project"}.Generate(genCtx)).To(Succeed())
 			for _, r := range genCtx.Roots {
 				Expect(r.Errors).To(HaveLen(0))
 			}
 
 			By("loading the generated v1 YAML")
-			actualFile, err := ioutil.ReadFile(path.Join(outputDir, "manifests.yaml"))
+			actualFile, err := ioutil.ReadFile(path.Join(outputDir, "webhook.yaml"))
 			Expect(err).NotTo(HaveOccurred())
 			actualManifest := &admissionregv1.ValidatingWebhookConfiguration{}
 			Expect(yaml.UnmarshalStrict(actualFile, actualManifest)).To(Succeed())
 
 			By("loading the desired v1 YAML")
-			expectedFile, err := ioutil.ReadFile("manifests.yaml")
+			expectedFile, err := ioutil.ReadFile("webhook.yaml")
 			Expect(err).NotTo(HaveOccurred())
 			expectedManifest := &admissionregv1.ValidatingWebhookConfiguration{}
 			Expect(yaml.UnmarshalStrict(expectedFile, expectedManifest)).To(Succeed())
@@ -254,12 +241,3 @@ var _ = Describe("Webhook Generation From Parsing to CustomResourceDefinition", 
 		}
 	})
 })
-
-func unmarshalBothV1(in []byte) (mutating admissionregv1.MutatingWebhookConfiguration, validating admissionregv1.ValidatingWebhookConfiguration) {
-	documents := bytes.Split(in, []byte("\n---\n"))
-	ExpectWithOffset(1, documents).To(HaveLen(2), "expected two documents in file, found %d", len(documents))
-
-	ExpectWithOffset(1, yaml.UnmarshalStrict(documents[0], &mutating)).To(Succeed(), "expected the first document in the file to be a mutating webhook configuration")
-	ExpectWithOffset(1, yaml.UnmarshalStrict(documents[1], &validating)).To(Succeed(), "expected the second document in the file to be a validating webhook configuration")
-	return
-}

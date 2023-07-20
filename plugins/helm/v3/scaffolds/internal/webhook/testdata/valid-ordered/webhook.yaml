@@ -2,15 +2,18 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-project.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "helm-project.fullname" . }}-validating-webhook-cfg'
 webhooks:
 - admissionReviewVersions:
   - v1
   - v1beta1
   clientConfig:
     service:
-      name: webhook-service
-      namespace: system
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail
   matchPolicy: Equivalent
@@ -31,8 +34,8 @@ webhooks:
   - v1beta1
   clientConfig:
     service:
-      name: webhook-service
-      namespace: system
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-cronjoblist
   failurePolicy: Fail
   matchPolicy: Equivalent
@@ -53,8 +56,8 @@ webhooks:
   - v1beta1
   clientConfig:
     service:
-      name: webhook-service
-      namespace: system
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-deployments
   failurePolicy: Fail
   matchPolicy: Equivalent
