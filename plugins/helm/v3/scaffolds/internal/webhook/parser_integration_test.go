@@ -18,7 +18,7 @@ package webhook_test
 
 import (
 	"bytes"
-	"github.com/labring/kubebuilder4helm/pkg/webhook"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/webhook"
 	"io/ioutil"
 	"os"
 	"path"
