@@ -18,9 +18,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/labring/kubebuilder4helm/internal/webhook"
 	"io"
 	"os"
-	"sigs.k8s.io/controller-tools/pkg/webhook"
 	"strings"
 
 	"github.com/spf13/cobra"
