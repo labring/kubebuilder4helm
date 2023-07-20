@@ -2,19 +2,23 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-project.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "helm-project.fullname" . }}-mutating-webhook-cfg'
 webhooks:
 - admissionReviewVersions:
   - v1
   - v1beta1
   clientConfig:
     service:
-      name: webhook-service
-      namespace: system
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
       path: /mutate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: default.cronjob.testdata.kubebuilder.io
+  reinvocationPolicy: IfNeeded
   rules:
   - apiGroups:
     - testdata.kubebuiler.io
@@ -27,20 +31,22 @@ webhooks:
     - cronjobs
   sideEffects: None
   timeoutSeconds: 10
-  reinvocationPolicy: IfNeeded
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-project.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "helm-project.fullname" . }}-validating-webhook-cfg'
 webhooks:
 - admissionReviewVersions:
   - v1
   - v1beta1
   clientConfig:
     service:
-      name: webhook-service
-      namespace: system
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail
   matchPolicy: Equivalent
@@ -62,8 +68,8 @@ webhooks:
   - v1beta1
   clientConfig:
     service:
-      name: webhook-service
-      namespace: system
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail
   matchPolicy: Equivalent

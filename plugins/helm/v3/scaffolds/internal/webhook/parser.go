@@ -19,7 +19,7 @@ limitations under the License.
 //
 // The markers take the form:
 //
-//	+kubebuilder:webhook:webhookVersions=<[]string>,failurePolicy=<string>,matchPolicy=<string>,groups=<[]string>,resources=<[]string>,verbs=<[]string>,versions=<[]string>,name=<string>,path=<string>,mutating=<bool>,sideEffects=<string>,timeoutSeconds=<int>,admissionReviewVersions=<[]string>,reinvocationPolicy=<string>
+//	+kubebuilder4helm:webhook:webhookVersions=<[]string>,failurePolicy=<string>,matchPolicy=<string>,groups=<[]string>,resources=<[]string>,verbs=<[]string>,versions=<[]string>,name=<string>,path=<string>,mutating=<bool>,sideEffects=<string>,timeoutSeconds=<int>,admissionReviewVersions=<[]string>,reinvocationPolicy=<string>
 package webhook
 
 import (
@@ -42,14 +42,19 @@ const (
 )
 
 var (
-	// ConfigDefinition s a marker for defining Webhook manifests.
+	// configDefinition s a marker for defining Webhook manifests.
 	// Call ToWebhook on the value to get a Kubernetes Webhook.
-	ConfigDefinition = markers.Must(markers.MakeDefinition("kubebuilder:webhook", markers.DescribesPackage, Config{}))
+	configDefinition *markers.Definition
 )
 
 // supportedWebhookVersions returns currently supported API version of {Mutating,Validating}WebhookConfiguration.
 func supportedWebhookVersions() []string {
 	return []string{defaultWebhookVersion}
+}
+
+func Registry(reg *markers.Registry) error {
+	configDefinition = markers.Must(markers.MakeDefinition("kubebuilder4helm:webhook", markers.DescribesPackage, Config{}))
+	return reg.Register(configDefinition)
 }
 
 // +controllertools:marker:generateHelp:category=Webhook
@@ -147,7 +152,7 @@ func verbToAPIVariant(verbRaw string) admissionregv1.OperationType {
 }
 
 // ToMutatingWebhook converts this rule to its Kubernetes API form.
-func (c Config) ToMutatingWebhook() (admissionregv1.MutatingWebhook, error) {
+func (c Config) ToMutatingWebhook(pName string) (admissionregv1.MutatingWebhook, error) {
 	if !c.Mutating {
 		return admissionregv1.MutatingWebhook{}, fmt.Errorf("%s is a validating webhook", c.Name)
 	}
@@ -162,7 +167,7 @@ func (c Config) ToMutatingWebhook() (admissionregv1.MutatingWebhook, error) {
 		Rules:                   c.rules(),
 		FailurePolicy:           c.failurePolicy(),
 		MatchPolicy:             matchPolicy,
-		ClientConfig:            c.clientConfig(),
+		ClientConfig:            c.clientConfig(pName),
 		SideEffects:             c.sideEffects(),
 		TimeoutSeconds:          c.timeoutSeconds(),
 		AdmissionReviewVersions: c.AdmissionReviewVersions,
@@ -171,7 +176,7 @@ func (c Config) ToMutatingWebhook() (admissionregv1.MutatingWebhook, error) {
 }
 
 // ToValidatingWebhook converts this rule to its Kubernetes API form.
-func (c Config) ToValidatingWebhook() (admissionregv1.ValidatingWebhook, error) {
+func (c Config) ToValidatingWebhook(pName string) (admissionregv1.ValidatingWebhook, error) {
 	if c.Mutating {
 		return admissionregv1.ValidatingWebhook{}, fmt.Errorf("%s is a mutating webhook", c.Name)
 	}
@@ -186,7 +191,7 @@ func (c Config) ToValidatingWebhook() (admissionregv1.ValidatingWebhook, error) 
 		Rules:                   c.rules(),
 		FailurePolicy:           c.failurePolicy(),
 		MatchPolicy:             matchPolicy,
-		ClientConfig:            c.clientConfig(),
+		ClientConfig:            c.clientConfig(pName),
 		SideEffects:             c.sideEffects(),
 		TimeoutSeconds:          c.timeoutSeconds(),
 		AdmissionReviewVersions: c.AdmissionReviewVersions,
@@ -251,12 +256,12 @@ func (c Config) matchPolicy() (*admissionregv1.MatchPolicyType, error) {
 }
 
 // clientConfig returns the client config for a webhook.
-func (c Config) clientConfig() admissionregv1.WebhookClientConfig {
+func (c Config) clientConfig(pName string) admissionregv1.WebhookClientConfig {
 	path := c.Path
 	return admissionregv1.WebhookClientConfig{
 		Service: &admissionregv1.ServiceReference{
-			Name:      "webhook-service",
-			Namespace: "system",
+			Name:      fmt.Sprintf(`{{ include "%s.fullname" . }}-webhook-service`, pName),
+			Namespace: `{{.Release.Namespace}}`,
 			Path:      &path,
 		},
 	}
@@ -327,13 +332,16 @@ type Generator struct {
 
 	// Year specifies the year to substitute for " YEAR" in the header file.
 	Year string `marker:",optional"`
+
+	// ProjectName is the name of the project that this webhook is associated with.
+	ProjectName string `marker:",optional"`
 }
 
 func (Generator) RegisterMarkers(into *markers.Registry) error {
-	if err := into.Register(ConfigDefinition); err != nil {
+	if err := into.Register(configDefinition); err != nil {
 		return err
 	}
-	into.AddHelp(ConfigDefinition, Config{}.Help())
+	into.AddHelp(configDefinition, Config{}.Help())
 	return nil
 }
 
@@ -347,7 +355,7 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 			root.AddError(err)
 		}
 
-		cfgs := markerSet[ConfigDefinition.Name]
+		cfgs := markerSet[configDefinition.Name]
 		sort.SliceStable(cfgs, func(i, j int) bool {
 			return cfgs[i].(Config).Name < cfgs[j].(Config).Name
 		})
@@ -359,7 +367,7 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 				return err
 			}
 			if cfg.Mutating {
-				w, err := cfg.ToMutatingWebhook()
+				w, err := cfg.ToMutatingWebhook(g.ProjectName)
 				if err != nil {
 					return err
 				}
@@ -367,7 +375,7 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 					mutatingCfgs[webhookVersion] = append(mutatingCfgs[webhookVersion], w)
 				}
 			} else {
-				w, err := cfg.ToValidatingWebhook()
+				w, err := cfg.ToValidatingWebhook(g.ProjectName)
 				if err != nil {
 					return err
 				}
@@ -389,7 +397,10 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 				Version: version,
 				Kind:    "MutatingWebhookConfiguration",
 			})
-			objRaw.SetName("mutating-webhook-configuration")
+			objRaw.SetName(fmt.Sprintf(`{{ include "%s.fullname" . }}-mutating-webhook-cfg`, g.ProjectName))
+			objRaw.SetAnnotations(map[string]string{
+				"cert-manager.io/inject-ca-from": fmt.Sprintf(`{{.Release.Namespace}}/{{ include "%s.fullname" . }}-selfsigned-issuer`, g.ProjectName),
+			})
 			objRaw.Webhooks = cfgs
 			for i := range objRaw.Webhooks {
 				// SideEffects is required in admissionregistration/v1, if this is not set or set to `Some` or `Known`,
@@ -420,7 +431,10 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 				Version: version,
 				Kind:    "ValidatingWebhookConfiguration",
 			})
-			objRaw.SetName("validating-webhook-configuration")
+			objRaw.SetName(fmt.Sprintf(`{{ include "%s.fullname" . }}-validating-webhook-cfg`, g.ProjectName))
+			objRaw.SetAnnotations(map[string]string{
+				"cert-manager.io/inject-ca-from": fmt.Sprintf(`{{.Release.Namespace}}/{{ include "%s.fullname" . }}-selfsigned-issuer`, g.ProjectName),
+			})
 			objRaw.Webhooks = cfgs
 			for i := range objRaw.Webhooks {
 				// SideEffects is required in admissionregistration/v1, if this is not set or set to `Some` or `Known`,
@@ -456,9 +470,9 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 	for k, v := range versionedWebhooks {
 		var fileName string
 		if k == defaultWebhookVersion {
-			fileName = fmt.Sprintf("manifests.yaml")
+			fileName = fmt.Sprintf("webhook.yaml")
 		} else {
-			fileName = fmt.Sprintf("manifests.%s.yaml", k)
+			fileName = fmt.Sprintf("webhook.%s.yaml", k)
 		}
 		if err := ctx.WriteYAML(fileName, headerText, v, genall.WithTransform(genall.TransformRemoveCreationTimestamp)); err != nil {
 			return err

@@ -1,0 +1,75 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-project.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "helm-project.fullname" . }}-validating-webhook-cfg'
+webhooks:
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      service:
+        name: '{{ include "helm-project.fullname" . }}-webhook-service'
+        namespace: '{{.Release.Namespace}}'
+        path: /validate-testdata-kubebuilder-io-v1-cronjob
+    failurePolicy: Fail
+    matchPolicy: Equivalent
+    name: cronjob.testdata.kubebuilder.io
+    rules:
+      - apiGroups:
+          - testdata.kubebuiler.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - cronjobs
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      service:
+        name: '{{ include "helm-project.fullname" . }}-webhook-service'
+        namespace: '{{.Release.Namespace}}'
+        path: /validate-testdata-kubebuilder-io-v1-cronjoblist
+    failurePolicy: Fail
+    matchPolicy: Equivalent
+    name: cronjoblist.testdata.kubebuilder.io
+    rules:
+      - apiGroups:
+          - testdata.kubebuiler.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - cronjoblist
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+      - v1beta1
+    clientConfig:
+      service:
+        name: '{{ include "helm-project.fullname" . }}-webhook-service'
+        namespace: '{{.Release.Namespace}}'
+        path: /validate-testdata-kubebuilder-io-v1-deployments
+    failurePolicy: Fail
+    matchPolicy: Equivalent
+    name: deployment.testdata.kubebuilder.io
+    rules:
+      - apiGroups:
+          - testdata.kubebuiler.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - deployments
+    sideEffects: None

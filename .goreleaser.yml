@@ -2,11 +2,12 @@ before:
   hooks:
     # You may remove this if you don't use go modules.
     - go mod download
-    # you may remove this if you don't need go generate
-    - go generate ./...
 builds:
-  - env:
+  - id: kubebuilder4helm
+    env:
       - CGO_ENABLED=0
+    main: ./cmd/kubebuilder4helm
+    binary: kubebuilder4helm
     goos:
       - linux
       - darwin
