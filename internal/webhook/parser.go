@@ -44,7 +44,7 @@ const (
 var (
 	// configDefinition s a marker for defining Webhook manifests.
 	// Call ToWebhook on the value to get a Kubernetes Webhook.
-	configDefinition *markers.Definition
+	configDefinition = markers.Must(markers.MakeDefinition("kubebuilder4helm:webhook", markers.DescribesPackage, Config{}))
 )
 
 // supportedWebhookVersions returns currently supported API version of {Mutating,Validating}WebhookConfiguration.
@@ -53,7 +53,6 @@ func supportedWebhookVersions() []string {
 }
 
 func Registry(reg *markers.Registry) error {
-	configDefinition = markers.Must(markers.MakeDefinition("kubebuilder4helm:webhook", markers.DescribesPackage, Config{}))
 	return reg.Register(configDefinition)
 }
 

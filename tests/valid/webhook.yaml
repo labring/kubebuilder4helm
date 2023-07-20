@@ -1,0 +1,88 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "xxxfff.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "xxxfff.fullname" . }}-mutating-webhook-cfg'
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: '{{ include "xxxfff.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
+      path: /mutate-testdata-kubebuilder-io-v1-cronjob
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: default.cronjob.testdata.kubebuilder.io
+  reinvocationPolicy: IfNeeded
+  rules:
+  - apiGroups:
+    - testdata.kubebuiler.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - cronjobs
+  sideEffects: None
+  timeoutSeconds: 10
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "xxxfff.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "xxxfff.fullname" . }}-validating-webhook-cfg'
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: '{{ include "xxxfff.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
+      path: /validate-testdata-kubebuilder-io-v1-cronjob
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validation.cronjob.testdata.kubebuilder.io
+  rules:
+  - apiGroups:
+    - testdata.kubebuiler.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - cronjobs
+  sideEffects: None
+  timeoutSeconds: 10
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: '{{ include "xxxfff.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
+      path: /validate-testdata-kubebuilder-io-v1-cronjob
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validation.cronjob.testdata.kubebuilder.io
+  rules:
+  - apiGroups:
+    - testdata.kubebuiler.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - cronjobs
+  sideEffects: NoneOnDryRun
+  timeoutSeconds: 10

@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"github.com/labring/kubebuilder4helm/internal/version"
 	"github.com/labring/kubebuilder4helm/plugins"
 	golangv4 "github.com/labring/kubebuilder4helm/plugins/golang/v4"
 	helmv1 "github.com/labring/kubebuilder4helm/plugins/helm/v3"
@@ -33,7 +34,7 @@ func main() {
 	)
 	c, err := cli.New(
 		cli.WithCommandName("kubebuilder4helm"),
-		cli.WithVersion(versionString()),
+		cli.WithVersion(version.String()),
 		cli.WithExtraCommands(), // 如果有额外的命令
 		cli.WithPlugins(
 			gov4Bundle,
@@ -50,10 +51,4 @@ func main() {
 	if err := c.Run(); err != nil {
 		log.Fatal(err)
 	}
-}
-
-// versionString returns the CLI version
-func versionString() string {
-	// return your binary project version
-	return "v0.0.1"
 }
