@@ -18,6 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
+	"github.com/labring/kubebuilder4helm/internal/version"
 	"github.com/spf13/afero"
 
 	"github.com/labring/kubebuilder4helm/plugins/golang/v4/scaffolds/internal/templates"
@@ -130,13 +131,14 @@ func (s *initScaffolder) Scaffold() error {
 		},
 		&templates.GitIgnore{},
 		&templates.Makefile{
-			Image:                      imageName,
-			BoilerplatePath:            s.boilerplatePath,
-			ControllerToolsVersion:     ControllerToolsVersion,
-			HelmVersion:                helmVersion,
-			ControllerRuntimeVersion:   ControllerRuntimeVersion,
-			EndpointOperatorLibVersion: EndpointOperatorLibVersion,
-			IsLegacyLayout:             s.isLegacyLayout,
+			Image:                       imageName,
+			BoilerplatePath:             s.boilerplatePath,
+			ControllerToolsVersion:      ControllerToolsVersion,
+			ControllerToolsVersion4Helm: version.String(),
+			HelmVersion:                 helmVersion,
+			ControllerRuntimeVersion:    ControllerRuntimeVersion,
+			EndpointOperatorLibVersion:  EndpointOperatorLibVersion,
+			IsLegacyLayout:              s.isLegacyLayout,
 		},
 		&templates.Dockerfile{IsLegacyLayout: s.isLegacyLayout},
 		&templates.DockerIgnore{},

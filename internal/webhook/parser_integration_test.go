@@ -17,7 +17,7 @@ limitations under the License.
 package webhook_test
 
 import (
-	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/webhook"
+	"github.com/labring/kubebuilder4helm/internal/webhook"
 	"io/ioutil"
 	"os"
 	"path"

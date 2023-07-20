@@ -40,6 +40,8 @@ type Makefile struct {
 	ControllerRuntimeVersion string
 	// EndpointOperatorLibVersion version to be used to download the envtest setup script
 	EndpointOperatorLibVersion string
+	// ControllerToolsVersion4Helm version to be used to download the envtest setup script
+	ControllerToolsVersion4Helm string
 	//IsLegacyLayout indicates if the project is using the legacy layout
 	IsLegacyLayout bool
 	MainGO         string
@@ -211,10 +213,12 @@ KUBECTL ?= kubectl
 HELM ?= $(LOCALBIN)/helm
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
+CONTROLLER_GEN4HELM ?= $(LOCALBIN)/controller-gen4helm
 
 ## Tool Versions
 HELM_VERSION ?= {{ .HelmVersion }}
 CONTROLLER_TOOLS_VERSION ?= {{ .ControllerToolsVersion }}
+CONTROLLER_TOOLS_VERSION4HELM ?= {{ .ControllerToolsVersion4Helm }}
 
 .PHONY: helm
 helm: $(HELM) ## Download helm locally if necessary. If wrong version is installed, it will be removed before downloading.
@@ -224,6 +228,13 @@ $(HELM): $(LOCALBIN)
 		rm -rf $(LOCALBIN)/helm; \
 	fi
 	test -s $(LOCALBIN)/helm ||curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && HELM_INSTALL_DIR=$(LOCALBIN)  ./get_helm.sh --version $(HELM_VERSION) --no-sudo && rm -f get_helm.sh
+
+.PHONY: controller-gen4helm
+controller-gen4helm: $(CONTROLLER_GEN4HELM) ## Download controller-gen4helm locally if necessary. If wrong version is installed, it will be removed before downloading.
+$(CONTROLLER_GEN4HELM): $(LOCALBIN)
+	test -s $(LOCALBIN)/controller-gen4helm && $(LOCALBIN)/controller-gen4helm --version | grep -q $(CONTROLLER_TOOLS_VERSION4HELM) || \
+	GOBIN=$(LOCALBIN) go install github.com/labring/kubebuilder4helm/cmd/controller-gen4helm@$(CONTROLLER_TOOLS_VERSION4HELM)
+
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.

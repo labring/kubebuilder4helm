@@ -8,6 +8,8 @@ builds:
       - CGO_ENABLED=0
     main: ./cmd/kubebuilder4helm
     binary: kubebuilder4helm
+    ldflags:
+      - -X github.com/labring/kubebuilder4helm/internal/version.version={{.Version}}
     goos:
       - linux
       - darwin
@@ -15,7 +17,20 @@ builds:
     goarch:
       - amd64
       - arm64
-
+  - id: controller-gen4helm
+    env:
+      - CGO_ENABLED=0
+    main: ./cmd/controller-gen4helm
+    binary: controller-gen4helm
+    ldflags:
+      - -X github.com/labring/kubebuilder4helm/internal/version.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
 #archives:
 #  - replacements:
 #      darwin: darwin
