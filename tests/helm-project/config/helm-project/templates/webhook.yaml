@@ -1,5 +1,34 @@
 ---
 apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-project.fullname"
+      . }}-selfsigned-issuer'
+  name: '{{ include "helm-project.fullname" . }}-mutating-webhook-cfg'
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
+      path: /mutate-user-my-domain-v1beta1-setting
+  failurePolicy: Fail
+  name: msetting.kb.io
+  rules:
+  - apiGroups:
+    - user.my.domain
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - settings
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
@@ -7,69 +36,23 @@ metadata:
       . }}-selfsigned-issuer'
   name: '{{ include "helm-project.fullname" . }}-validating-webhook-cfg'
 webhooks:
-  - admissionReviewVersions:
-      - v1
-      - v1beta1
-    clientConfig:
-      service:
-        name: '{{ include "helm-project.fullname" . }}-webhook-service'
-        namespace: '{{.Release.Namespace}}'
-        path: /validate-testdata-kubebuilder-io-v1-cronjob
-    failurePolicy: Fail
-    matchPolicy: Equivalent
-    name: cronjob.testdata.kubebuilder.io
-    rules:
-      - apiGroups:
-          - testdata.kubebuiler.io
-        apiVersions:
-          - v1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - cronjobs
-    sideEffects: None
-  - admissionReviewVersions:
-      - v1
-      - v1beta1
-    clientConfig:
-      service:
-        name: '{{ include "helm-project.fullname" . }}-webhook-service'
-        namespace: '{{.Release.Namespace}}'
-        path: /validate-testdata-kubebuilder-io-v1-cronjoblist
-    failurePolicy: Fail
-    matchPolicy: Equivalent
-    name: cronjoblist.testdata.kubebuilder.io
-    rules:
-      - apiGroups:
-          - testdata.kubebuiler.io
-        apiVersions:
-          - v1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - cronjoblist
-    sideEffects: None
-  - admissionReviewVersions:
-      - v1
-      - v1beta1
-    clientConfig:
-      service:
-        name: '{{ include "helm-project.fullname" . }}-webhook-service'
-        namespace: '{{.Release.Namespace}}'
-        path: /validate-testdata-kubebuilder-io-v1-deployments
-    failurePolicy: Fail
-    matchPolicy: Equivalent
-    name: deployment.testdata.kubebuilder.io
-    rules:
-      - apiGroups:
-          - testdata.kubebuiler.io
-        apiVersions:
-          - v1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - deployments
-    sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "helm-project.fullname" . }}-webhook-service'
+      namespace: '{{.Release.Namespace}}'
+      path: /validate-user-my-domain-v1beta1-setting
+  failurePolicy: Fail
+  name: vsetting.kb.io
+  rules:
+  - apiGroups:
+    - user.my.domain
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - settings
+  sideEffects: None

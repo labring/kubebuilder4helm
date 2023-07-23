@@ -48,8 +48,7 @@ func (f *Certificate) SetTemplateDefaults() error {
 	return nil
 }
 
-const certManagerTemplate = `{{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
-# The following manifests contain a self-signed issuer CR and a certificate CR.
+const certManagerTemplate = `# The following manifests contain a self-signed issuer CR and a certificate CR.
 # More document can be found at https://docs.cert-manager.io
 # WARNING: Targets CertManager v1.0. Check https://cert-manager.io/docs/installation/upgrading/ for breaking changes.
 apiVersion: cert-manager.io/v1
@@ -74,6 +73,5 @@ spec:
   issuerRef:
     kind: Issuer
     name: {{ include "[[ .ProjectName ]].fullname" . }}-selfsigned-issuer
-  secretName: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-server-cert 
-{{- end }}
+  secretName: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-server-cert
 `

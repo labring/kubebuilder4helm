@@ -46,7 +46,8 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=config/charts/helm-project/crds
+	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=config/helm-project/crds
+	$(CONTROLLER_GEN4HELM) webhook:projectName=helm-project paths="./..." output:webhook:artifacts:config=config/helm-project/templates/
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -136,10 +137,12 @@ KUBECTL ?= kubectl
 HELM ?= $(LOCALBIN)/helm
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
+CONTROLLER_GEN4HELM ?= $(LOCALBIN)/controller-gen4helm
 
 ## Tool Versions
 HELM_VERSION ?= v3.12.1
 CONTROLLER_TOOLS_VERSION ?= v0.12.0
+CONTROLLER_TOOLS_VERSION4HELM ?= latest
 
 .PHONY: helm
 helm: $(HELM) ## Download helm locally if necessary. If wrong version is installed, it will be removed before downloading.
@@ -149,6 +152,13 @@ $(HELM): $(LOCALBIN)
 		rm -rf $(LOCALBIN)/helm; \
 	fi
 	test -s $(LOCALBIN)/helm ||curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && chmod 700 get_helm.sh && HELM_INSTALL_DIR=$(LOCALBIN)  ./get_helm.sh --version $(HELM_VERSION) --no-sudo && rm -f get_helm.sh
+
+.PHONY: controller-gen4helm
+controller-gen4helm: $(CONTROLLER_GEN4HELM) ## Download controller-gen4helm locally if necessary. If wrong version is installed, it will be removed before downloading.
+$(CONTROLLER_GEN4HELM): $(LOCALBIN)
+	test -s $(LOCALBIN)/controller-gen4helm && $(LOCALBIN)/controller-gen4helm --version | grep -q $(CONTROLLER_TOOLS_VERSION4HELM) || \
+	GOBIN=$(LOCALBIN) go install github.com/labring/kubebuilder4helm/cmd/controller-gen4helm@$(CONTROLLER_TOOLS_VERSION4HELM)
+
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.
