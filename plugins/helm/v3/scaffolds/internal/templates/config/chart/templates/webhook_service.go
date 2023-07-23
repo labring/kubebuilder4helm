@@ -48,8 +48,7 @@ func (f *WebhookService) SetTemplateDefaults() error {
 	return nil
 }
 
-const webhookServiceTemplate = `{{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
-apiVersion: v1
+const webhookServiceTemplate = `apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-service
@@ -63,5 +62,4 @@ spec:
       name: webhook
   selector:
     {{- include "[[ .ProjectName ]].selectorLabels" . | nindent 4 }}
-{{- end }}
 `

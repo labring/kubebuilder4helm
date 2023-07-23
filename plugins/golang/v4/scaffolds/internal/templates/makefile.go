@@ -119,7 +119,8 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=config/charts/{{ .ProjectName }}/crds
+	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=config/{{ .ProjectName }}/crds
+	$(CONTROLLER_GEN4HELM) webhook:projectName={{ .ProjectName }} paths="./..." output:webhook:artifacts:config=config/{{ .ProjectName }}/templates
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.

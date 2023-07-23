@@ -31,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	userv1beta1 "github.com/labring/kubebuilder4helm/api/v1beta1"
 	//+kubebuilder:scaffold:imports
 	utilcontroller "github.com/labring/operator-sdk/controller"
 )
@@ -43,6 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(userv1beta1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -51,7 +53,6 @@ func main() {
 		metricsAddr          string
 		enableLeaderElection bool
 		probeAddr            string
-		concurrent           int
 		rateLimiterOptions   utilcontroller.RateLimiterOptions
 	)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -59,7 +60,6 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.IntVar(&concurrent, "concurrent", 5, "The number of concurrent cluster reconciles.")
 	rateLimiterOptions.BindFlags(flag.CommandLine)
 	opts := zap.Options{
 		Development: true,
@@ -93,6 +93,34 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controller.SettingReconciler{}).SetupWithManager(mgr, rateLimiterOptions); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Setting")
+		os.Exit(1)
+	}
+	if os.Getenv("DISABLE_WEBHOOKS") != "true" {
+		if err = (&userv1beta1.Setting{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Setting")
+			os.Exit(1)
+		} else {
+			setupLog.Info("webhook disable", "webhook", "Setting")
+		}
+	}
+	if os.Getenv("DISABLE_WEBHOOKS") != "true" {
+		if err = (&userv1beta1.Setting{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Setting")
+			os.Exit(1)
+		} else {
+			setupLog.Info("webhook disable", "webhook", "Setting")
+		}
+	}
+	if os.Getenv("DISABLE_WEBHOOKS") != "true" {
+		if err = (&userv1beta1.Setting{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Setting")
+			os.Exit(1)
+		} else {
+			setupLog.Info("webhook disable", "webhook", "Setting")
+		}
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
