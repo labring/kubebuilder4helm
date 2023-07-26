@@ -51,5 +51,5 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "helm-project.webhookEnabled" }}
-{{- "true" }}
+{{- "false" }}
 {{- end }}

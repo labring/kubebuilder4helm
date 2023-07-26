@@ -70,6 +70,6 @@ spec:
       containers:
         - name: cert-manager-check
           image: busybox:latest
-          command: ["sh", "-c", "until echo exit | telnet cert-manager-webhook.cert-manager.svc 443; do echo waiting for cert-manager; sleep 10; done;"]
+          command: ["sh", "-c", "until echo exit | telnet {{ .Values.certManager.domain }} {{ .Values.certManager.port }}; do echo waiting for cert-manager; sleep 10; done;"]
 {{- end }}
 `

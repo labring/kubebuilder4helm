@@ -33,7 +33,6 @@ var _ plugins.Scaffolder = &initScaffolder{}
 
 type initScaffolder struct {
 	config config.Config
-
 	// fs is the filesystem that will be used by the scaffolder
 	fs machinery.Filesystem
 }
@@ -82,7 +81,7 @@ func (s *initScaffolder) Scaffold() error {
 		&templates2.Helpers{},
 		&templates2.MonitorService{Force: true},
 		&templates2.Monitor{Force: true},
-		&templates2.ServiceAccount{Force: true},
+		&templates2.Rbac{Force: true},
 	}
 
 	return scaffold.Execute(templates...)

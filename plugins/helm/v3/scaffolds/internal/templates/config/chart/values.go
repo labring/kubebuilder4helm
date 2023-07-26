@@ -68,4 +68,8 @@ image:
   tag: "latest"
 
 prometheus: false
+
+certManager:
+  domain: cert-manager-webhook.cert-manager.svc
+  port: 443
 `
