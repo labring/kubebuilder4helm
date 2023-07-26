@@ -21,6 +21,7 @@ import (
 	"github.com/labring/kubebuilder4helm/internal/validation"
 	"os"
 	"path/filepath"
+	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -34,8 +35,8 @@ import (
 var _ plugin.InitSubcommand = &initSubcommand{}
 
 type initSubcommand struct {
-	config config.Config
-
+	config   config.Config
+	resource *resource.Resource
 	// config options
 	domain string
 	name   string

@@ -18,6 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
+	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/chart/templates"
 	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/samples"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
@@ -68,6 +69,7 @@ func (s *apiScaffolder) Scaffold() error {
 	if s.resource.HasAPI() {
 		if err := scaffold.Execute(
 			&samples.CRDSample{Force: s.force},
+			&templates.RbacCR{Force: s.force},
 			//&rbac.CRDEditorRole{},
 			//&rbac.CRDViewerRole{},
 		); err != nil {
