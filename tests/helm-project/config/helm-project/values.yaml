@@ -4,15 +4,66 @@
 replicaCount: 1
 nameOverride: ""
 fullnameOverride: ""
-image:
-  repository: github.com/labring
-  pullPolicy: IfNotPresent
-  image: helm-project
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+main:
+  image:
+    repository: github.com/labring/helm-project
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
+
+proxy:
+  image:
+    repository: gcr.io/kubebuilder/kube-rbac-proxy
+    pullPolicy: IfNotPresent
+    tag: "v0.13.0"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 5m
+      memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
 
 prometheus: false
 
 certManager:
   domain: cert-manager-webhook.cert-manager.svc
   port: 443
+
+logger:
+  #Development Mode
+  zap: true
+  #  Can be one of 'debug', 'info', 'error'
+  level: info
+
+rateLimiter:
+  minRetryDelay: 5ms
+  maxRetryDelay: 1000s
+  defaultQPS: 10.0
+  defaultBurst: 100
+  defaultConcurrent: 5
+
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
