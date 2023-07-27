@@ -66,9 +66,9 @@ func (s *webhookScaffolder) Scaffold() error {
 
 	if err := scaffold.Execute(
 		&templates2.Helpers{Force: true, WebhookEnabled: true},
-		&templates2.CertManagerCheck{Force: s.force},
+		&templates2.WebhookCertManagerCheck{Force: s.force},
 		&templates2.WebhookService{Force: s.force},
-		&templates2.Certificate{Force: s.force},
+		&templates2.WebhookCertificate{Force: s.force},
 		//&kdefault.WebhookCAInjectionPatch{},
 		//&kdefault.ManagerWebhookPatch{},
 		//&webhook.KustomizeConfig{},

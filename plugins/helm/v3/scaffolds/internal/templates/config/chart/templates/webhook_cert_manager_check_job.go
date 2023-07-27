@@ -21,10 +21,10 @@ import (
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-var _ machinery.Template = &CertManagerCheck{}
+var _ machinery.Template = &WebhookCertManagerCheck{}
 
-// CertManagerCheck scaffolds a file that defines the helm scheme for the helpers.
-type CertManagerCheck struct {
+// WebhookCertManagerCheck scaffolds a file that defines the helm scheme for the helpers.
+type WebhookCertManagerCheck struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
 	machinery.RepositoryMixin
@@ -32,9 +32,9 @@ type CertManagerCheck struct {
 }
 
 // SetTemplateDefaults implements file.Template
-func (f *CertManagerCheck) SetTemplateDefaults() error {
+func (f *WebhookCertManagerCheck) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", f.ProjectName, "templates", "cert-manager-check.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "webhook-cert-manager-check.yaml")
 	}
 	f.SetDelim("[[", "]]")
 	f.TemplateBody = certManagerCheckTemplate

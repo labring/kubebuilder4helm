@@ -22,19 +22,19 @@ import (
 	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
-var _ machinery.Template = &Certificate{}
+var _ machinery.Template = &WebhookCertificate{}
 
-// Certificate scaffolds a file that defines the issuer CR and the certificate CR
-type Certificate struct {
+// WebhookCertificate scaffolds a file that defines the issuer CR and the certificate CR
+type WebhookCertificate struct {
 	machinery.TemplateMixin
 	machinery.ProjectNameMixin
 	Force bool
 }
 
 // SetTemplateDefaults implements file.Template
-func (f *Certificate) SetTemplateDefaults() error {
+func (f *WebhookCertificate) SetTemplateDefaults() error {
 	if f.Path == "" {
-		f.Path = filepath.Join("config", f.ProjectName, "templates", "certificate.yaml")
+		f.Path = filepath.Join("config", f.ProjectName, "templates", "webhook-certificate.yaml")
 	}
 	f.SetDelim("[[", "]]")
 	f.TemplateBody = certManagerTemplate
