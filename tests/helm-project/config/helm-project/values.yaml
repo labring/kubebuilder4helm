@@ -9,7 +9,7 @@ main:
     repository: github.com/labring/helm-project
     pullPolicy: IfNotPresent
     tag: "latest"
-  resources:
+  resources: 
     limits:
       cpu: 100m
       memory: 128Mi
@@ -27,7 +27,7 @@ proxy:
     repository: gcr.io/kubebuilder/kube-rbac-proxy
     pullPolicy: IfNotPresent
     tag: "v0.13.0"
-  resources:
+  resources: 
     limits:
       cpu: 500m
       memory: 512Mi

@@ -1,0 +1,56 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "helm-project.fullname" . }}-setting
+  labels:
+    {{- include "helm-project.labels" . | nindent 4 }}
+rules:
+# Add CR roles.
+- apiGroups:
+  - user.my.domain
+  resources:
+  - settings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - user.my.domain
+  resources:
+  - settings/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "helm-project.fullname" . }}-rolebinding
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "helm-project.fullname" . }}-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "helm-project.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "helm-project.fullname" . }}-clusterrolebinding
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "helm-project.fullname" . }}-setting
+subjects:
+- kind: ServiceAccount
+  name: {{ include "helm-project.fullname" . }}
+  namespace: {{ .Release.Namespace }}

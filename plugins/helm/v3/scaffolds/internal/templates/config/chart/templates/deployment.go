@@ -103,6 +103,12 @@ spec:
               port: health
           resources:
             {{- toYaml .Values.main.resources | nindent 12 }}
+          {{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+          {{- end }}
         - name: kube-rbac-proxy
           args:
             - --secure-listen-address=0.0.0.0:8443
@@ -130,5 +136,12 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if include "[[ .ProjectName ]].webhookEnabled" . -}}
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: {{ include "[[ .ProjectName ]].fullname" . }}-webhook-server-cert
       {{- end }}
 `
