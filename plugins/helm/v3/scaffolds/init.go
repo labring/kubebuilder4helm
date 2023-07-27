@@ -82,6 +82,7 @@ func (s *initScaffolder) Scaffold() error {
 		&templates2.MonitorService{Force: true},
 		&templates2.Monitor{Force: true},
 		&templates2.Rbac{Force: true},
+		&templates2.Deployment{Force: true},
 	}
 
 	return scaffold.Execute(templates...)
