@@ -17,11 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"log"
+
 	"github.com/labring/kubebuilder4helm/internal/version"
 	"github.com/labring/kubebuilder4helm/plugins"
 	golangv4 "github.com/labring/kubebuilder4helm/plugins/golang/v4"
 	helmv1 "github.com/labring/kubebuilder4helm/plugins/helm/v3"
-	"log"
 	"sigs.k8s.io/kubebuilder/v3/pkg/cli"
 	cfgv3 "sigs.k8s.io/kubebuilder/v3/pkg/config/v3"
 	"sigs.k8s.io/kubebuilder/v3/pkg/plugin"

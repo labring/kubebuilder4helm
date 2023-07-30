@@ -1,4 +1,4 @@
-package controller
+package valid
 
 // +kubebuilder4helm:rbac:groups=batch.io,resources=cronjobs,verbs=get;watch;create
 // +kubebuilder4helm:rbac:groups=batch.io,resources=cronjobs/status,verbs=get;update;patch

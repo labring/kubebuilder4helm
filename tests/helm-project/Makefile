@@ -48,7 +48,7 @@ help: ## Display this help.
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=config/helm-project/crds
 	$(CONTROLLER_GEN4HELM) webhook:projectName=helm-project paths="./..." output:webhook:artifacts:config=config/helm-project/templates
-
+	$(CONTROLLER_GEN4HELM) rbac:projectName=helm-project paths="./..." output:webhook:artifacts:config=.
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."

@@ -3,16 +3,16 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "xxxfff.fullname"
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-pp.fullname"
       . }}-selfsigned-issuer'
-  name: '{{ include "xxxfff.fullname" . }}-mutating-webhook-cfg'
+  name: '{{ include "helm-pp.fullname" . }}-mutating-webhook-cfg'
 webhooks:
 - admissionReviewVersions:
   - v1
   - v1beta1
   clientConfig:
     service:
-      name: '{{ include "xxxfff.fullname" . }}-webhook-service'
+      name: '{{ include "helm-pp.fullname" . }}-webhook-service'
       namespace: '{{.Release.Namespace}}'
       path: /mutate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail
@@ -36,16 +36,16 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "xxxfff.fullname"
+    cert-manager.io/inject-ca-from: '{{.Release.Namespace}}/{{ include "helm-pp.fullname"
       . }}-selfsigned-issuer'
-  name: '{{ include "xxxfff.fullname" . }}-validating-webhook-cfg'
+  name: '{{ include "helm-pp.fullname" . }}-validating-webhook-cfg'
 webhooks:
 - admissionReviewVersions:
   - v1
   - v1beta1
   clientConfig:
     service:
-      name: '{{ include "xxxfff.fullname" . }}-webhook-service'
+      name: '{{ include "helm-pp.fullname" . }}-webhook-service'
       namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail
@@ -68,7 +68,7 @@ webhooks:
   - v1beta1
   clientConfig:
     service:
-      name: '{{ include "xxxfff.fullname" . }}-webhook-service'
+      name: '{{ include "helm-pp.fullname" . }}-webhook-service'
       namespace: '{{.Release.Namespace}}'
       path: /validate-testdata-kubebuilder-io-v1-cronjob
   failurePolicy: Fail

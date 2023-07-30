@@ -19,8 +19,9 @@ package templates
 import (
 	"fmt"
 	"path/filepath"
-	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 	"text/template"
+
+	"sigs.k8s.io/kubebuilder/v3/pkg/machinery"
 )
 
 var _ machinery.Template = &Helpers{}
