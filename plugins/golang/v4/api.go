@@ -20,8 +20,9 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	pluginsdk "github.com/labring/kubebuilder4helm/plugin"
 	"os"
+
+	pluginsdk "github.com/labring/kubebuilder4helm/plugin"
 
 	"github.com/spf13/pflag"
 

@@ -18,11 +18,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/labring/kubebuilder4helm/internal/version"
-	"github.com/labring/kubebuilder4helm/internal/webhook"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/labring/kubebuilder4helm/internal/rbac"
+	"github.com/labring/kubebuilder4helm/internal/version"
+	"github.com/labring/kubebuilder4helm/internal/webhook"
 
 	"github.com/spf13/cobra"
 
@@ -32,7 +34,8 @@ import (
 	"sigs.k8s.io/controller-tools/pkg/markers"
 )
 
-//go:generate go run main.go webhook:projectName=xxxfff paths="tests/valid/..." output:webhook:artifacts:config=tests/valid/
+//go:generate go run main.go webhook:projectName=xxxfff paths="./tests/valid/..." output:webhook:artifacts:config=tests/valid/
+//go:generate go run main.go rbac:projectName=xxxfff paths="./tests/valid/..." output:rbac:artifacts:config=tests/valid/
 
 // Options are specified to controller-gen by turning generators and output rules into
 // markers, and then parsing them using the standard registry logic (without the "+").
@@ -45,6 +48,7 @@ var (
 	// and has options for output forms.
 	allGenerators = map[string]genall.Generator{
 		"webhook": webhook.Generator{},
+		"rbac":    rbac.Generator{},
 	}
 	// allOutputRules defines the list of all known output rules, giving
 	// them names for use on the command line.

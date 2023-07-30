@@ -19,7 +19,7 @@ limitations under the License.
 //
 // The markers take the form:
 //
-//	+kubebuilder:rbac:groups=<groups>,resources=<resources>,resourceNames=<resource names>,verbs=<verbs>,urls=<non resource urls>
+//	+kubebuilder4helm:rbac:groups=<groups>,resources=<resources>,resourceNames=<resource names>,verbs=<verbs>,urls=<non resource urls>
 package rbac
 
 import (
@@ -37,7 +37,7 @@ import (
 var (
 	// RuleDefinition is a marker for defining RBAC rules.
 	// Call ToRule on the value to get a Kubernetes RBAC policy rule.
-	RuleDefinition = markers.Must(markers.MakeDefinition("kubebuilder:rbac", markers.DescribesPackage, Rule{}))
+	RuleDefinition = markers.Must(markers.MakeDefinition("kubebuilder4helm:rbac", markers.DescribesPackage, Rule{}))
 )
 
 // +controllertools:marker:generateHelp:category=RBAC
@@ -147,14 +147,14 @@ func (r *Rule) ToRule() rbacv1.PolicyRule {
 
 // Generator generates ClusterRole objects.
 type Generator struct {
-	// RoleName sets the name of the generated ClusterRole.
-	RoleName string
-
 	// HeaderFile specifies the header text (e.g. license) to prepend to generated files.
 	HeaderFile string `marker:",optional"`
 
 	// Year specifies the year to substitute for " YEAR" in the header file.
 	Year string `marker:",optional"`
+
+	// ProjectName is the name of the project that this webhook is associated with.
+	ProjectName string `marker:",optional"`
 }
 
 func (Generator) RegisterMarkers(into *markers.Registry) error {
@@ -167,7 +167,7 @@ func (Generator) RegisterMarkers(into *markers.Registry) error {
 
 // GenerateRoles generate a slice of objs representing either a ClusterRole or a Role object
 // The order of the objs in the returned slice is stable and determined by their namespaces.
-func GenerateRoles(ctx *genall.GenerationContext, roleName string) ([]interface{}, error) {
+func GenerateRoles(ctx *genall.GenerationContext, projectName string) ([]interface{}, error) {
 	rulesByNS := make(map[string][]*Rule)
 	for _, root := range ctx.Roots {
 		markerSet, err := markers.PackageMarkers(ctx.Collector, root)
@@ -224,43 +224,105 @@ func GenerateRoles(ctx *genall.GenerationContext, roleName string) ([]interface{
 
 	// process the items in rulesByNS by the order specified in `namespaces` to make sure that the Role order is stable
 	var objs []interface{}
+
+	roleName := fmt.Sprintf(`{{ include "%s.fullname" . }}-controllertools-role`, projectName)
+	roleBindingName := fmt.Sprintf(`{{ include "%s.fullname" . }}-controllertools-rolebinding`, projectName)
+
+	clusterRoleName := fmt.Sprintf(`{{ include "%s.fullname" . }}-controllertools-clusterrole`, projectName)
+	clusterRoleBindingName := fmt.Sprintf(`{{ include "%s.fullname" . }}-controllertools-clusterrolebinding`, projectName)
+
+	saName := fmt.Sprintf(`{{ include "%s.fullname" . }}`, projectName)
+
+	var namespacePolicyRules []rbacv1.PolicyRule
+	var clusterPolicyRules []rbacv1.PolicyRule
+
 	for _, ns := range namespaces {
 		rules := rulesByNS[ns]
 		policyRules := NormalizeRules(rules)
 		if len(policyRules) == 0 {
 			continue
 		}
+
 		if ns == "" {
-			objs = append(objs, rbacv1.ClusterRole{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "ClusterRole",
-					APIVersion: rbacv1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: roleName,
-				},
-				Rules: policyRules,
-			})
+			namespacePolicyRules = append(namespacePolicyRules, policyRules...)
 		} else {
-			objs = append(objs, rbacv1.Role{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Role",
-					APIVersion: rbacv1.SchemeGroupVersion.String(),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      roleName,
-					Namespace: ns,
-				},
-				Rules: policyRules,
-			})
+			clusterPolicyRules = append(clusterPolicyRules, policyRules...)
 		}
+	}
+
+	if len(clusterPolicyRules) > 0 {
+		objs = append(objs, rbacv1.ClusterRole{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ClusterRole",
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: clusterRoleName,
+			},
+			Rules: clusterPolicyRules,
+		})
+		objs = append(objs, rbacv1.ClusterRoleBinding{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ClusterRoleBinding",
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: clusterRoleBindingName,
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind:      "ServiceAccount",
+					Name:      saName,
+					Namespace: "{{ .Release.Namespace }}",
+				},
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: rbacv1.SchemeGroupVersion.String(),
+				Kind:     "ClusterRole",
+				Name:     clusterRoleName,
+			},
+		})
+	}
+
+	if len(namespacePolicyRules) > 0 {
+		objs = append(objs, rbacv1.Role{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Role",
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: roleName,
+			},
+			Rules: namespacePolicyRules,
+		})
+		objs = append(objs, rbacv1.RoleBinding{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "RoleBinding",
+				APIVersion: rbacv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: roleBindingName,
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind:      "ServiceAccount",
+					Name:      saName,
+					Namespace: "{{ .Release.Namespace }}",
+				},
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: rbacv1.SchemeGroupVersion.String(),
+				Kind:     "Role",
+				Name:     roleName,
+			},
+		})
 	}
 
 	return objs, nil
 }
 
 func (g Generator) Generate(ctx *genall.GenerationContext) error {
-	objs, err := GenerateRoles(ctx, g.RoleName)
+	objs, err := GenerateRoles(ctx, g.ProjectName)
 	if err != nil {
 		return err
 	}
@@ -279,5 +341,5 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 	}
 	headerText = strings.ReplaceAll(headerText, " YEAR", " "+g.Year)
 
-	return ctx.WriteYAML("role.yaml", headerText, objs, genall.WithTransform(genall.TransformRemoveCreationTimestamp))
+	return ctx.WriteYAML("rbac_controolertools.yaml", headerText, objs, genall.WithTransform(genall.TransformRemoveCreationTimestamp))
 }

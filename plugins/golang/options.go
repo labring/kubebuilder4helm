@@ -17,8 +17,9 @@ limitations under the License.
 package golang
 
 import (
-	"github.com/labring/kubebuilder4helm/plugin"
 	"path"
+
+	"github.com/labring/kubebuilder4helm/plugin"
 
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"
 	cfgv2 "sigs.k8s.io/kubebuilder/v3/pkg/config/v2"

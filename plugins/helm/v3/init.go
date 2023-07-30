@@ -18,11 +18,12 @@ package v3
 
 import (
 	"fmt"
-	"github.com/labring/kubebuilder4helm/internal/validation"
 	"os"
 	"path/filepath"
-	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
 	"strings"
+
+	"github.com/labring/kubebuilder4helm/internal/validation"
+	"sigs.k8s.io/kubebuilder/v3/pkg/model/resource"
 
 	"github.com/spf13/pflag"
 

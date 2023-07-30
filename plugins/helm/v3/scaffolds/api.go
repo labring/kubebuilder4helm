@@ -18,6 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
+
 	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/chart/templates"
 	"github.com/labring/kubebuilder4helm/plugins/helm/v3/scaffolds/internal/templates/config/samples"
 	"sigs.k8s.io/kubebuilder/v3/pkg/config"

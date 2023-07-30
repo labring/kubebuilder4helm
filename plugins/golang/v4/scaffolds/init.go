@@ -18,6 +18,7 @@ package scaffolds
 
 import (
 	"fmt"
+
 	"github.com/labring/kubebuilder4helm/internal/version"
 	"github.com/spf13/afero"
 
