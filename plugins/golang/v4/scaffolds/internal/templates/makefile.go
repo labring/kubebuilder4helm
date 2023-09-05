@@ -118,13 +118,13 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: controller-gen controller-gen4helm ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) crd paths="./..." output:crd:artifacts:config=config/{{ .ProjectName }}/crds
 	$(CONTROLLER_GEN4HELM) webhook:projectName={{ .ProjectName }} paths="./..." output:webhook:artifacts:config=config/{{ .ProjectName }}/templates
 	$(CONTROLLER_GEN4HELM) rbac:projectName={{ .ProjectName }} paths="./..." output:rbac:artifacts:config=config/{{ .ProjectName }}/templates
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+generate: controller-gen controller-gen4helm ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	{{ if .BoilerplatePath -}}
 	$(CONTROLLER_GEN) object:headerFile={{printf "%q" .BoilerplatePath}} paths="./..."
 	{{- else -}}
